@@ -1,0 +1,307 @@
+/**
+ * 01-code-flow/theme.css — the visual language of Prototype 01.
+ * ---------------------------------------------------------------------------
+ * This is where "minimalist + friendly" (DESIGN_PROTOTYPE1 §9) becomes concrete:
+ *    • generous white space        → spacious spacing in the components
+ *    • rounded cards               → generous border radii
+ *    • restrained colour palette   → a small set of tokens
+ *    • clear hierarchy             → ink / muted / line greys
+ *
+ * Tailwind v4 is CSS-first: `@import 'tailwindcss'` replaces the old
+ * tailwind.config.js, and `@theme` declares design tokens that automatically
+ * generate utilities (e.g. `--color-brand` → `bg-brand`, `text-brand`).
+ *
+ * Everything here is scoped to Prototype 01 — each prototype owns its theme so
+ * the three visual identities stay independent.
+ */
+
+@import 'tailwindcss';
+
+/* ========================================================================== */
+/* Design tokens                                                              */
+/* ========================================================================== */
+@theme {
+  /* Surfaces */
+  --color-canvas: #f6f7fb; /* app background — soft, low-contrast grey-blue */
+  --color-surface: #ffffff; /* cards and sheets */
+  --color-line: #e7e9f2; /* hairline borders */
+
+  /* Text */
+  --color-ink: #1b2030; /* primary text — very high contrast on surface */
+  --color-muted: #666e82; /* secondary text — 5.1:1 on white (AA) */
+
+  /* Brand */
+  --color-brand: #4d57e0; /* primary action — 5.4:1 on white (AA) */
+  --color-brand-ink: #3a43c4; /* hover / pressed */
+  --color-brand-soft: #eef0ff; /* tinted backgrounds */
+  --color-accent: #d95f22; /* warm accent, used sparingly (AA on white) */
+  --color-success: #157347;
+  --color-danger: #c02626;
+
+  /* Typography */
+  --font-sans:
+    'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Noto Sans', sans-serif;
+}
+
+/* ========================================================================== */
+/* Typography                                                                 */
+/* -------------------------------------------------------------------------- */
+/* Plus Jakarta Sans - self-hosted and inlined into the single-file build.     */
+/*                                                                             */
+/* WHY SELF-HOSTED? The deliverable must contain zero external requests, so a  */
+/* Google Fonts <link> or a CDN @import is not an option. The .woff2 is         */
+/* imported through Vite, which converts it into a base64 data URI at build    */
+/* time because `build.assetsInlineLimit` is set very high in vite.config.js.  */
+/*                                                                             */
+/* This is the LATIN subset only, to keep the file small. Anything outside that */
+/* range - and decorative emoji such as the sparkle in the AI messages - falls  */
+/* through to the next font in the stack, which is exactly what we want.        */
+/*                                                                             */
+/* Licence: SIL Open Font License 1.1 - free to embed and redistribute.         */
+/* ========================================================================== */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  /* One variable file covers every weight the UI uses (400/500/600/700). */
+  font-weight: 200 800;
+  font-display: swap;
+  /* A single src entry on purpose: listing the url twice would make Vite     */
+  /* inline the same font twice and double its cost in the final file.        */
+  src: url('./assets/fonts/plus-jakarta-sans-latin-var.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ========================================================================== */
+/* Base styles                                                                */
+/* ========================================================================== */
+@layer base {
+  html {
+    /* Prevent iOS from inflating text in landscape. */
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-canvas text-ink font-sans antialiased;
+    margin: 0;
+    font-size: 16px;
+    /* Slightly more generous than the browser default.
+       The persona is a casual creator reading friendly copy, so a little extra
+       breathing room measurably helps readability. The values stay small
+       (sub-pixel at 16px) so the UI looks tidy rather than loose. */
+    line-height: 1.6;
+    letter-spacing: 0.02em; /* about 0.32px at 16px */
+    word-spacing: 0.05em; /* about 0.8px at 16px */
+  }
+
+  /* Visible, high-contrast focus ring for keyboard users (WCAG 2.4.7).
+     `:focus-visible` keeps the ring off mouse clicks. */
+  :focus-visible {
+    outline: 3px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+
+  /* Do not leave stray outlines on mouse interactions. */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* Reduce-motion support (AGENTS.md requirement).
+     We neutralise transitions/animations rather than removing them, so state
+     changes still apply instantly and no layout logic breaks. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ========================================================================== */
+/* Reusable form styles                                                       */
+/* -------------------------------------------------------------------------- */
+/* Native controls (<input>, <select>, <textarea>) are used everywhere because */
+/* they are keyboard- and screen-reader-friendly by default. These two classes */
+/* give them a consistent, friendly appearance.                                */
+/* ========================================================================== */
+@layer components {
+  /* Skip link (accessibility) --------------------------------------------- */
+  /* Visually hidden until it receives keyboard focus, at which point it
+     appears as a small pill so a keyboard user can jump straight past the
+     navigation. Written as PLAIN CSS on purpose: this class must never depend
+     on Tailwind emitting it, and a custom @utility whose body contains only
+     nested rules is silently dropped from the build. */
+  .skip-link {
+    position: fixed;
+    top: 0.75rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 60;
+
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    background-color: var(--color-brand);
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+
+    /* Visually hidden state. */
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .skip-link:focus,
+  .skip-link:focus-visible {
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 0.5rem 1rem;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+    /* A dark outline so the ring stays visible on the brand-coloured pill. */
+    outline: 3px solid #1b2030;
+    outline-offset: 3px;
+  }
+  .field {
+    @apply w-full rounded-xl border border-line bg-canvas px-3 py-2.5 text-sm text-ink;
+  }
+
+  .field:focus-visible {
+    @apply border-brand;
+  }
+
+  .field-label {
+    @apply block text-sm font-medium text-ink;
+  }
+
+  .field-hint {
+    @apply mt-1 text-xs text-muted;
+  }
+}
+
+/* ========================================================================== */
+/* Custom utilities                                                           */
+/* ========================================================================== */
+
+/** Hide scrollbars on horizontally scrollable carousels (keeps swipe tidy). */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/** Respect the iPhone home-indicator safe area under bottom bars. */
+@utility pb-safe {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px));
+}
+
+/* ========================================================================== */
+/* Vue <Transition> definitions                                               */
+/* -------------------------------------------------------------------------- */
+/* Each transition expresses something meaningful (DESIGN_PROTOTYPE1 §8):     */
+/*   fade      — a gentle state change                                        */
+/*   pop       — new AI-generated content arriving                            */
+/*   sheet     — a bottom sheet rising into place                             */
+/*   fade-page — moving between workflow steps                                */
+/* ========================================================================== */
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 180ms ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.pop-enter-active {
+  transition:
+    opacity 220ms ease,
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.pop-enter-from {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+}
+
+.sheet-enter-active,
+.sheet-leave-active {
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.sheet-enter-from,
+.sheet-leave-to {
+  transform: translateY(100%);
+}
+
+.fade-page-enter-active,
+.fade-page-leave-active {
+  transition:
+    opacity 200ms ease,
+    transform 200ms ease;
+}
+.fade-page-enter-from {
+  opacity: 0;
+  transform: translateY(6px);
+}
+.fade-page-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+/* A subtle looping "AI is thinking" pulse used by <GenerationState>.
+   Communicates activity without pretending to show real progress. */
+@keyframes flow-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+
+.animate-breathe {
+  animation: flow-breathe 1.4s ease-in-out infinite;
+}
+
+/* Shimmer used on loading placeholder cards. */
+@keyframes flow-shimmer {
+  0% {
+    background-position: -140% 0;
+  }
+  100% {
+    background-position: 240% 0;
+  }
+}
+
+.animate-shimmer {
+  background-image: linear-gradient(
+    100deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: flow-shimmer 1.3s linear infinite;
+}

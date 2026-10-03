@@ -1,0 +1,25 @@
+{
+  "name": "code-flow-prototypes",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Three standalone HTML5 prototypes for the E-Song Intelligent AI short-video creation platform. Authored with Vue 3 + Tailwind CSS + Vite, compiled into self-contained single-file HTML deliverables.",
+  "scripts": {
+    "dev": "node scripts/build.mjs --dev",
+    "build": "node scripts/build.mjs 01",
+    "build:01": "node scripts/build.mjs 01",
+    "build:02": "node scripts/build.mjs 02",
+    "build:03": "node scripts/build.mjs 03",
+    "build:all": "node scripts/build.mjs all"
+  },
+  "dependencies": {
+    "vue": "^3.5.43"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-vue": "^6.0.9",
+    "tailwindcss": "^4.3.3",
+    "vite": "^7.1.0",
+    "vite-plugin-singlefile": "^2.3.3"
+  }
+}

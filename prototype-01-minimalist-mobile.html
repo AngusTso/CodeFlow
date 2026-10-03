@@ -1,0 +1,55 @@
+<!doctype html>
+<!--
+  prototype-01-minimalist-mobile.html
+  ============================================================================
+  Vite ENTRY file for Prototype 01 — "Code Flow".
+
+  During development this file is served by `npm run dev`.
+  After `npm run build:01`, Vite + vite-plugin-singlefile inline the compiled
+  JavaScript and CSS into a copy of this file inside ./dist, producing a single
+  self-contained deliverable you can open by double-clicking.
+
+  Notes
+    • The favicon is an inline SVG data-URI. We deliberately avoid a /public
+      folder because those files are NOT inlined by the single-file plugin and
+      would break the "one file" requirement.
+    • No external fonts or CDNs are referenced — the file must work offline.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- viewport-fit=cover enables correct safe-area insets on notched phones -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light" />
+    <meta
+      name="description"
+      content="Code Flow — a mobile-first AI short-video creation experience for casual creators. Prototype 01 of the E-Song Intelligent frontend assignment."
+    />
+
+    <!-- Inline SVG favicon (a friendly rounded square with a play glyph). -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%235a67f2'/%3E%3Cpath d='M13 10.5l9 5.5-9 5.5z' fill='white'/%3E%3C/svg%3E"
+    />
+
+    <title>Code Flow — AI Short Video Studio</title>
+  </head>
+  <body>
+    <!-- Vue mounts here. The <noscript> block keeps the page meaningful and
+         accessible if JavaScript is unavailable. -->
+    <div id="app"></div>
+
+    <noscript>
+      <div style="font-family: system-ui, sans-serif; padding: 2rem; max-width: 40rem; margin: 0 auto">
+        <h1>Code Flow</h1>
+        <p>
+          This prototype is an interactive front-end demo and requires JavaScript to be
+          enabled in your browser.
+        </p>
+      </div>
+    </noscript>
+
+    <!-- Application entry point. -->
+    <script type="module" src="/src/prototypes/01-code-flow/main.js"></script>
+  </body>
+</html>
