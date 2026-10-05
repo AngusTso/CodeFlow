@@ -464,3 +464,79 @@ export const SAMPLE_PROJECTS = [
   { id: 'p-4', title: 'Festival Promo', scenes: 5, updated: 'Edited last week', type: 'abstract', progress: 30 },
 ]
 
+
+/* ========================================================================== */
+/* Prototype 02: professional control vocabulary                                */
+/* --------------------------------------------------------------------------- */
+/* Prototype 02 brief section 8 - "Keep the control vocabulary intentionally     */
+/* limited for the prototype." Section 13 - origin badges that make the timeline */
+/* AI-aware. ADDITIVE: Prototype 01 never imports anything below this line.      */
+/* ========================================================================== */
+
+/** Camera lens values (brief section 8). */
+export const LENSES = ['18mm', '24mm', '35mm', '50mm', '85mm']
+
+/** Camera movement (brief section 8). */
+export const MOVEMENTS = ['Static', 'Push-in', 'Tracking', 'Handheld', 'Crane']
+
+/** Framing (brief section 8). */
+export const FRAMINGS = ['Extreme Wide', 'Wide', 'Medium', 'Medium Close', 'Close', 'Extreme Close']
+
+/** Lighting intensity is a continuous 0-100% value (brief section 8). */
+export const LIGHTING_INTENSITY = { min: 0, max: 100, step: 1 }
+
+/** Lighting contrast (brief section 8). */
+export const LIGHTING_CONTRAST = ['Low', 'Medium', 'High']
+
+/**
+ * Origin badges (brief section 13). These tell the reviewer whether a clip was
+ * produced by AI, edited by a person, or is an alternative AI take - which is
+ * how the prototype says "AI participates, the human remains in control".
+ *
+ * `glyph` holds the badge character itself (see the U+ code points above).
+ * @type {{id: string, label: string, glyph: string, title: string}[]}
+ */
+export const ORIGIN_BADGES = [
+  {
+    id: 'ai-generated',
+    label: 'AI Generated',
+    glyph: '✨',
+    title: 'Produced by AI and untouched since',
+  },
+  {
+    id: 'human-edited',
+    label: 'Human Edited',
+    glyph: '✎',
+    title: 'Adjusted by a person',
+  },
+  {
+    id: 'ai-variation',
+    label: 'AI Variation',
+    glyph: '↻',
+    title: 'A generated alternative take',
+  },
+]
+
+/** Marketing scene roles (brief section 19). */
+export const MARKETING_ROLES = ['hook', 'product', 'benefit', 'cta']
+
+/** Human labels for those roles. */
+export const MARKETING_ROLE_LABELS = {
+  hook: 'Hook',
+  product: 'Product',
+  benefit: 'Benefit',
+  cta: 'CTA',
+}
+
+/**
+ * Example Copilot instructions (brief section 10), offered as quick chips so a
+ * reviewer can drive the proposal -> review -> apply flow without typing.
+ * @type {string[]}
+ */
+export const COPILOT_SUGGESTIONS = [
+  'Make this scene feel like a tense 1980s sci-fi thriller.',
+  'Make this scene feel more tense and cinematic.',
+  'Give the opening a stronger hook.',
+  'Match the lighting of the previous scene.',
+  'Shorten this for social.',
+]

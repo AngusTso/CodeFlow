@@ -19,6 +19,60 @@
 import { uid } from '../utils/random.js'
 
 /**
+ * Who produced a given value. This is what the AI-aware timeline badges and
+ * the origin indicator communicate (Prototype 02 brief, sections 13 and 17):
+ * "AI participates in production while the human remains in control."
+ * @typedef {'ai-generated' | 'human-edited' | 'ai-variation'} SceneOrigin
+ */
+
+/**
+ * A retained alternative take for a scene (Prototype 02 brief, section 15).
+ * Variations are NEVER silently applied - the original stays recoverable.
+ * @typedef {object} Variation
+ * @property {string} id
+ * @property {string} sceneId
+ * @property {string} label          e.g. "Variation 02".
+ * @property {string} summary        Human-readable description of the change.
+ * @property {string[]} changes      Changed areas, e.g. ["Lighting", "Mood"].
+ * @property {Scene} value           Full scene snapshot for this variation.
+ * @property {boolean} isOriginal    True for the untouched baseline.
+ */
+
+/**
+ * One lane of the four-track timeline (Prototype 02 brief, section 12).
+ * @typedef {object} TimelineTrack
+ * @property {string} id
+ * @property {'video'|'dialogue'|'audio'|'effects'} kind
+ * @property {string} label
+ * @property {TimelineClip[]} clips
+ */
+
+/**
+ * A clip sitting on a timeline track.
+ * @typedef {object} TimelineClip
+ * @property {string} id
+ * @property {string} trackId
+ * @property {string} label
+ * @property {number} start        Seconds from the head of the sequence.
+ * @property {number} duration     Seconds.
+ * @property {SceneOrigin} origin  Rendered as a badge on the clip.
+ * @property {string|null} sceneId Link to the scene for VIDEO clips.
+ * @property {string} gradient     Placeholder colour for the clip thumbnail.
+ */
+
+/**
+ * A proposal produced by the AI Copilot (Prototype 02 brief, section 10).
+ * It lists CREATIVE changes only - never model internals or reasoning.
+ * @typedef {object} CopilotProposal
+ * @property {string} id
+ * @property {string} instruction   The user's original instruction.
+ * @property {string} summary       One line describing the proposed direction.
+ * @property {string[]} changes     e.g. ["Lighting", "Colour palette", "Mood"].
+ * @property {object} patch         Concrete field changes, applied on approval.
+ * @property {'pending'|'applied'|'dismissed'} status
+ */
+
+/**
  * Lifecycle of a generated item. The UI shows different feedback per status.
  * @typedef {'queued' | 'generating' | 'ready'} GenerationStatus
  */
@@ -135,6 +189,14 @@ export function createScene(overrides = {}) {
     gradient: 'linear-gradient(135deg, #6d7cff 0%, #a78bfa 100%)',
     imageUrl: null,
     alt: 'AI-generated scene placeholder artwork',
+    /* Prototype 02 additions (brief section 28): extend ADDITIVELY. Prototype 01 never reads these, so Prototype 01 is unaffected. */
+    lens: '35mm',
+    movement: 'Static',
+    framing: 'Medium',
+    lightingIntensity: 70,
+    lightingContrast: 'Medium',
+    origin: 'ai-generated',
+    role: null,
     status: 'ready',
     ...overrides,
   }
@@ -235,7 +297,98 @@ export function createProject(overrides = {}) {
     characters: [],
     video: createVideoComposition(),
     export: createExportSettings(),
+    /* Prototype 02 additions (brief section 28). */
+    aspectRatio: '9:16',
+    tracks: [],
+    variations: [],
     completedSteps: [],
+    ...overrides,
+  }
+}
+
+/* ========================================================================== */
+/* Prototype 02 factories (Prototype 02 brief, section 28).                    */
+/* --------------------------------------------------------------------------- */
+/* These are additive: Prototype 01 does not import them, so the already-built  */
+/* Prototype 01 is unaffected. They exist so both prototypes keep ONE set of    */
+/* data shapes instead of drifting into duplicate models.                        */
+/* ========================================================================== */
+
+/**
+ * The four timeline lanes (brief section 12: VIDEO / DIALOGUE / AUDIO / EFFECTS).
+ * @type {{kind: 'video'|'dialogue'|'audio'|'effects', label: string}[]}
+ */
+export const TRACK_KINDS = [
+  { kind: 'video', label: 'VIDEO' },
+  { kind: 'dialogue', label: 'DIALOGUE' },
+  { kind: 'audio', label: 'AUDIO' },
+  { kind: 'effects', label: 'EFFECTS' },
+]
+
+/**
+ * Create one lane of the timeline.
+ * @param {{kind: string, label: string}} def - An entry from TRACK_KINDS.
+ * @param {Partial<TimelineTrack>} [overrides]
+ * @returns {TimelineTrack}
+ */
+export function createTimelineTrack(def, overrides = {}) {
+  return { id: uid('track'), kind: def.kind, label: def.label, clips: [], ...overrides }
+}
+
+/**
+ * Create a clip that sits on a timeline track.
+ * @param {Partial<TimelineClip>} [overrides]
+ * @returns {TimelineClip}
+ */
+export function createTimelineClip(overrides = {}) {
+  return {
+    id: uid('clip'),
+    trackId: '',
+    label: 'Clip',
+    start: 0,
+    duration: 4,
+    origin: 'ai-generated',
+    sceneId: null,
+    gradient: 'linear-gradient(135deg, #2a3442 0%, #1f2833 100%)',
+    ...overrides,
+  }
+}
+
+/**
+ * Create a variation of a scene. The baseline is stored separately and is
+ * never overwritten - brief section 15: "the original must remain recoverable".
+ *
+ * @param {Scene} scene - The scene this variation derives from.
+ * @param {object} [overrides]
+ * @returns {Variation}
+ */
+export function createVariation(scene, overrides = {}) {
+  return {
+    id: uid('variation'),
+    sceneId: scene.id,
+    label: 'Variation 01',
+    summary: '',
+    changes: [],
+    value: { ...scene, origin: 'ai-variation' },
+    isOriginal: false,
+    ...overrides,
+  }
+}
+
+/**
+ * Create a Copilot proposal (brief section 10). It describes CREATIVE changes
+ * only - never model internals or fabricated reasoning.
+ * @param {Partial<CopilotProposal>} [overrides]
+ * @returns {CopilotProposal}
+ */
+export function createCopilotProposal(overrides = {}) {
+  return {
+    id: uid('proposal'),
+    instruction: '',
+    summary: '',
+    changes: [],
+    patch: {},
+    status: 'pending',
     ...overrides,
   }
 }

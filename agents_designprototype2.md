@@ -5,6 +5,11 @@
 > **Purpose:** Implementation-facing design brief for Prototype 2.
 > The full product rationale and UX philosophy are documented in `DESIGN_PROTOTYPE.md`.
 > This file contains the concrete decisions the coding agent should follow when implementing Prototype 2.
+>
+> **Precedence (per the product owner):** `DESIGN_PROTOTYPE.md` is the primary authority for
+> design direction, visual identity, and philosophy. Where the two documents conflict on
+> *non-implementation* concerns, `DESIGN_PROTOTYPE.md` wins. This brief governs concrete,
+> implementation-level decisions (structure, vocabulary, file layout, priority order).
 
 ---
 

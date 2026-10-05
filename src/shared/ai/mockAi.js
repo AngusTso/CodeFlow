@@ -27,6 +27,8 @@ import {
   createStoryboard,
   createCharacter,
   createVideoComposition,
+  createVariation,
+  createCopilotProposal,
 } from '../domain/models.js'
 import {
   SCENE_TYPES,
@@ -46,6 +48,10 @@ import {
   byId,
   labelOf,
   gradientFor,
+  LENSES,
+  MOVEMENTS,
+  FRAMINGS,
+  LIGHTING_CONTRAST,
 } from '../data/mockData.js'
 
 /* ========================================================================== */
@@ -143,7 +149,7 @@ export function inferSceneTypes(idea = '') {
  * @param {{type: string}} options
  * @returns {import('../domain/models.js').Scene}
  */
-function buildScene(rng, index, { type }) {
+export function buildScene(rng, index, { type }) {
   // Guard against an unknown type so the banks below never return undefined.
   const safeType = SCENE_TITLE_BANK[type] ? type : 'urban'
 
@@ -349,4 +355,193 @@ export function simulateExport(settings) {
     },
     1400,
   )
+}
+
+/* ========================================================================== */
+/* Prototype 02 generators (Prototype 02 brief, sections 10, 11, 15, 29).      */
+/* --------------------------------------------------------------------------- */
+/* Same contract as everything above: deterministic, short simulated delay,     */
+/* and NEVER expose fake model reasoning or fake percentage progress.           */
+/*                                                                             */
+/* Brief section 29 is the rule these exist to satisfy:                        */
+/*   "Avoid static AI magic buttons that do not produce meaningful UI state     */
+/*    changes." Every proposal below therefore carries a concrete `patch` that  */
+/*   visibly changes both the Inspector and the preview when applied.           */
+/* ========================================================================== */
+
+/**
+ * Creative directions the Copilot can propose. Matching is keyword-based so
+ * the result is deterministic for a given instruction (same idea as
+ * `inferSceneTypes` above - this is a prototype, not an NLU system).
+ * @type {{id: string, match: RegExp, summary: string, changes: string[], patch: object}[]}
+ */
+const COPILOT_DIRECTIONS = [
+  {
+    id: 'tense',
+    match: /tense|thriller|dark|suspense|noir|tension/i,
+    summary: 'Tightens framing and hardens contrast for a tense thriller read.',
+    changes: ['Lighting', 'Colour palette', 'Camera movement', 'Mood'],
+    patch: {
+      lens: '85mm',
+      framing: 'Medium Close',
+      movement: 'Push-in',
+      lightingIntensity: 78,
+      lightingContrast: 'High',
+      gradient: 'linear-gradient(135deg, #1b2740 0%, #2f4a63 100%)',
+    },
+  },
+  {
+    id: 'cinematic',
+    match: /cinematic|film|movie|epic|shot/i,
+    summary: 'Adds a slow push-in with cinematic contrast.',
+    changes: ['Camera movement', 'Lighting', 'Framing'],
+    patch: {
+      lens: '50mm',
+      framing: 'Medium Close',
+      movement: 'Push-in',
+      lightingContrast: 'High',
+      gradient: 'linear-gradient(135deg, #1a2c40 0%, #2b4a66 100%)',
+    },
+  },
+  {
+    id: 'warm',
+    match: /warm|bright|cheer|friendly|uplift|soft|happy/i,
+    summary: 'Lifts the light and softens contrast for a warmer read.',
+    changes: ['Lighting', 'Colour palette', 'Mood'],
+    patch: {
+      lightingIntensity: 84,
+      lightingContrast: 'Low',
+      movement: 'Tracking',
+      gradient: 'linear-gradient(135deg, #2c3d47 0%, #4a6b7d 100%)',
+    },
+  },
+  {
+    id: 'scale',
+    match: /wide|scale|grand|vast|establish|reveal/i,
+    summary: 'Widens the lens and pulls back to reveal scale.',
+    changes: ['Lens', 'Framing', 'Camera movement'],
+    patch: { lens: '18mm', framing: 'Extreme Wide', movement: 'Crane' },
+  },
+  {
+    id: 'urgent',
+    match: /urgent|real|docu|chase|run|handheld|immediate/i,
+    summary: 'Switches to handheld for a more immediate documentary feel.',
+    changes: ['Camera movement', 'Framing'],
+    patch: { movement: 'Handheld', framing: 'Close' },
+  },
+]
+
+/** Used when no keyword matches, so a proposal always returns something useful. */
+const COPILOT_FALLBACK = {
+  id: 'refine',
+  summary: 'Refines contrast and camera movement for a cleaner composition.',
+  changes: ['Lighting', 'Camera movement'],
+  patch: { movement: 'Push-in', lightingIntensity: 72, lightingContrast: 'Medium' },
+}
+
+/**
+ * proposeChanges() - turn a free-text instruction into a reviewable proposal.
+ *
+ * This is one half of Prototype 02's core loop (brief section 30):
+ *   DIRECT -> GENERATE -> COMPARE -> ACCEPT / UNDO
+ *
+ * Only creative changes are listed (brief section 10). The proposal lists
+ * "Lighting" and "Camera movement", never anything resembling model internals.
+ *
+ * @param {string} instruction - The user's natural-language direction.
+ * @param {Scene} [scene] - The scene the proposal targets.
+ * @returns {Promise<CopilotProposal>}
+ */
+export function proposeChanges(instruction = '', scene = {}) {
+  const direction =
+    COPILOT_DIRECTIONS.find((entry) => entry.match.test(instruction)) || COPILOT_FALLBACK
+
+  const proposal = createCopilotProposal({
+    instruction,
+    summary: direction.summary,
+    changes: [...direction.changes],
+    patch: { ...direction.patch },
+    status: 'pending',
+  })
+
+  // Short, skippable latency so the review step is actually visible.
+  return simulate(proposal, 780)
+}
+/**
+ * Variation directions. One is chosen per `variant`, so pressing "Generate
+ * Another" walks through them in a deterministic order rather than ever
+ * repeating the same take twice by accident.
+ * @type {{summary: string, changes: string[], gradient: string}[]}
+ */
+const VARIATION_DIRECTIONS = [
+  {
+    summary: 'Tighter framing and harder contrast for a tense read.',
+    changes: ['Lighting', 'Camera movement', 'Framing'],
+    gradient: 'linear-gradient(135deg, #1b2740 0%, #2f4a63 100%)',
+  },
+  {
+    summary: 'Wider lens and crane movement to open up the space.',
+    changes: ['Lens', 'Camera movement'],
+    gradient: 'linear-gradient(135deg, #243447 0%, #3d5a75 100%)',
+  },
+  {
+    summary: 'Softer, brighter grade with reduced contrast.',
+    changes: ['Lighting', 'Colour palette'],
+    gradient: 'linear-gradient(135deg, #2b3d4d 0%, #4a6b7d 100%)',
+  },
+  {
+    summary: 'Handheld treatment for a more immediate feel.',
+    changes: ['Camera movement', 'Framing'],
+    gradient: 'linear-gradient(135deg, #1f2a36 0%, #37506b 100%)',
+  },
+  {
+    summary: 'Medium framing with a slow push for a steadier beat.',
+    changes: ['Lens', 'Camera movement'],
+    gradient: 'linear-gradient(135deg, #1a2530 0%, #2e4356 100%)',
+  },
+]
+
+/**
+ * generateVariation() - produce a NEW variant of a scene (brief section 15).
+ *
+ * The baseline scene is never mutated. The caller stores the returned variation
+ * alongside the original, so "Keep Original" and "Use Variation" both stay
+ * available - "the original must remain recoverable".
+ *
+ * Deterministic per (scene id, variant), matching every other generator here.
+ *
+ * @param {Scene} scene - The scene to derive a variation from.
+ * @param {number} [variant=1] - 1-based counter, bumped on each request.
+ * @returns {Promise<Variation>}
+ */
+export function generateVariation(scene, variant = 1) {
+  const rng = createRng(`variation::${scene.id}::${scene.type || ''}::${variant}`)
+
+  // Walk the direction list deterministically so "Generate Another" always
+  // yields something visibly different.
+  const direction = VARIATION_DIRECTIONS[(Math.max(1, variant) - 1) % VARIATION_DIRECTIONS.length]
+
+  const value = {
+    ...scene,
+    lens: pick(rng, LENSES),
+    movement: pick(rng, MOVEMENTS),
+    framing: pick(rng, FRAMINGS),
+    lightingIntensity: intBetween(rng, 45, 92),
+    lightingContrast: pick(rng, LIGHTING_CONTRAST),
+    origin: 'ai-variation',
+    gradient: direction.gradient,
+    // Identity and position are preserved so Vue keys, selection and timeline
+    // links keep working when a variation replaces the displayed frame.
+    id: scene.id,
+    order: scene.order,
+  }
+
+  const variation = createVariation(scene, {
+    label: `Variation ${String(variant).padStart(2, '0')}`,
+    summary: direction.summary,
+    changes: [...direction.changes],
+    value,
+  })
+
+  return simulate(variation, 1150)
 }
