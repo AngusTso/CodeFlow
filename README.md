@@ -525,6 +525,78 @@ The assignment asks for three genuinely distinct prototypes. Useful axes:
 
 ---
 
+## Prototype 03 — Creative Signal
+
+Prototype 03 is built and lives in `src/prototypes/03-creative-signal/`, with
+its entry file `prototype-03-creative-signal.html`. It is a **separate
+creative universe**, not a reskin of Prototype 01:
+
+> P1 *"I have an idea. Help me make a video."* — guided wizard, mobile-first
+> P3 *"I don't know what this could become."* — exploration, branching, desktop + tablet first
+
+### Design rationale (summary)
+
+* **Core loop:** SIGNAL → DISCOVER → COMBINE → GENERATE → EXPLORE → BRANCH →
+  STABILIZE → VIDEO. The Creative Universe (pan/zoom concept map) is the
+  centre of the product, which is why the layout is canvas-first with overlay
+  panels instead of pages and bottom tabs.
+* **Differentiation axes** (per spec §1.1): persona *creative explorer*,
+  device priority *desktop + tablet*, AI interaction *voice + sketch +
+  combination*, navigation *retro terminal command bar*, animation
+  *cinematic signal-like transitions*. Full rationale:
+  `agents_designprototype3.md`.
+* **Honesty:** everything AI is deterministic and labelled. A persistent
+  **SIMULATED AI GENERATION** badge (spec §82) and per-modal notices state
+  that no real model runs; loading copy follows the brief
+  (*"✨ AI is doing its magic…"*) without exposing fake chain-of-thought.
+* **Accessibility under the neon aesthetic** (spec §83): scanlines and CRT
+  glow are decorative and `aria-hidden`; all interactive neon states are
+  duplicated by text/border/icon changes, `:focus-visible` rings are always
+  on, and every gesture (wheel/pinch/drag) has button alternatives
+  (`+ / − / RESET` zoom, `MOVE UP/DOWN`-style explicit actions).
+
+### Architecture notes
+
+* **Reuses shared infrastructure:** hash router, shared domain models and
+  shared mock AI (the storyboard comes from the same `generateStoryboard()`
+  as P01/P02 — verified by `verify-p03.mjs`).
+* **Owns its own state:** `universeStore.js` (single reactive store +
+  computeds) keeps presentation independent from product state; modals are
+  driven by `useDialog` (focus trap, Escape, restore focus).
+* **Deterministic mock AI:** `signalAi.js` implements `generateStoryboard`,
+  `generateScene`, `generateCharacter`, `regenerateScene`, `composeVideo`
+  plus the P03-specific `synthesize`, `buildAlternatives`, `stabilize`,
+  `seedUniverse` — all seeded from the signal string, so runs are
+  reproducible.
+* **No new dependencies.** Vue 3 + Vite + the same CSS tooling as P01; both
+  fonts (Orbitron, Share Tech Mono) are self-hosted woff2 inlined at build.
+
+### Verification
+
+```powershell
+npm run build:03     # -> dist/prototype-03-creative-signal.html (single file)
+node verify-p03.mjs  # -> 20/20 logic tests (universe, synthesis, branches,
+                       #    stabilise, shared storyboard, preview, undo regressions)
+```
+
+The built file makes **zero network requests** (no external
+`src`/`href`/`url()`), so it runs offline from `file://`.
+
+### Responsive testing report (spec §48–§51, §84)
+
+| Width | Priority | What adapts | Test status |
+|-------|----------|-------------|-------------|
+| 1440px+ | Primary | Full universe canvas, side panels (node action panel, console), terminal nav with brand subtitle | Layout rules in `UniverseView` / `TerminalNav` `min-width: 768/1440px` |
+| 768px | Primary (tablet) | Panels collapse to overlay/sheet, pinch + drag gestures active on canvas | `max-width: 767px` collapses in `UniverseCanvas`, `TerminalNav` |
+| 375px | Fallback | Signal input, results, branch, stabilize, preview all single-column; nav becomes icon strip; modals go full-screen | `max-width: 560/480px` rules in `SignalView`, `LabView`, `ArchiveView`, `StoryboardView`, `PossibilityModal` |
+| 320px | Minimum | No horizontal overflow; touch targets ≥ 44px | Same fallback rules; longest words wrap (`white-space: normal` in `ArchiveView`) |
+
+Automated checks cover logic and build integrity; visual passes at the four
+widths should be done in a browser (open `dist/prototype-03-creative-signal.html`
+and use DevTools device mode).
+
+---
+
 ## Known limitations
 
 Being explicit, as the assignment asks:

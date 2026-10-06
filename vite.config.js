@@ -35,9 +35,11 @@ const repoRoot = dirname(fileURLToPath(import.meta.url))
  * The prototype registry. `entry` is the HTML file that Vite builds and that
  * also becomes the final deliverable's filename inside `dist/`.
  *
- * Prototypes 02 and 03 are declared but their entry files do not exist yet.
- * The build script skips any prototype whose entry file has not been created,
- * so the repository stays buildable while only Prototype 01 is implemented.
+ *   Prototypes 02 and 03 are declared. Prototype 03's entry is
+ *   `prototype-03-creative-signal.html`, which matches the name required by
+ *   the Prototype 03 brief (section 66).
+ *   The build script skips any prototype whose entry file has not been created,
+ *   so the repository stays buildable while only some prototypes are implemented.
  */
 export const PROTOTYPES = {
   '01': {
@@ -49,8 +51,8 @@ export const PROTOTYPES = {
     title: 'Code Flow Pro - professional AI video workspace (desktop-first)',
   },
   '03': {
-    entry: 'prototype-03-cyberpunk-experimental.html',
-    title: 'Prototype 03 - experimental / exploratory (direction tentative)',
+    entry: 'prototype-03-creative-signal.html',
+    title: 'Creative Signal - experimental AI creative exploration universe (desktop + tablet first)',
   },
 }
 
