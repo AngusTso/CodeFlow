@@ -21,7 +21,7 @@
  * The two paths are equally weighted on purpose: stabilising is not a
  * commitment. KEEP EXPLORING returns to the universe with nothing lost.
  */
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter, useStore } from '../../composables.js'
 import SigConsole from '../ui/SigConsole.vue'
 import SigButton from '../ui/SigButton.vue'
@@ -33,7 +33,22 @@ const router = useRouter()
 
 const concept = computed(() => store.state.concept)
 const busy = computed(() => store.state.ai.busy)
-const open = computed(() => Boolean(concept.value))
+
+/**
+ * TURN INTO VIDEO must CLOSE the modal without clearing the concept.
+ * (Calling store.keepExploring() here used to null `state.concept`, which
+ * made the Export screen permanently read "Stabilise a possibility first".)
+ * A new stabilisation (different node) resets the dismissal automatically.
+ */
+const dismissed = ref(false)
+watch(
+  () => concept.value?.nodeId,
+  () => {
+    dismissed.value = false
+  },
+)
+
+const open = computed(() => Boolean(concept.value) && !dismissed.value)
 
 /** The stabilised node, for its artwork. */
 const node = computed(() => store.nodes.value.find((item) => item.id === concept.value?.nodeId) || null)
@@ -49,7 +64,8 @@ function keepExploring() {
 /** Build the storyboard and move to the video stage (brief sections 29, 30). */
 async function turnIntoVideo() {
   await store.turnIntoVideo()
-  store.keepExploring()
+  // Keep `state.concept` alive — the Export screen and nav lock depend on it.
+  dismissed.value = true
   router.navigate('/export')
 }
 </script>
@@ -64,7 +80,10 @@ async function turnIntoVideo() {
   >
     <div v-if="concept" class="stz">
       <!-- The concept becomes visually dominant (brief section 39). -->
-      <div class="stz__art animate-cs-lock" :style="{ backgroundImage: node?.gradient }">
+      <div
+        class="stz__art animate-cs-lock"
+        :style="{ backgroundImage: node?.imageUrl ? `url('${node.imageUrl}')` : node?.gradient, backgroundSize: 'cover', backgroundPosition: 'center' }"
+      >
         <h3 class="stz__title">{{ concept.title }}</h3>
       </div>
 

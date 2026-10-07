@@ -65,7 +65,11 @@ const pushedCount = computed(() => Object.values(lab.value).filter(Boolean).leng
     <div v-if="active" class="lab__body">
       <!-- ===================== The subject ===================== -->
       <div class="lab__subject cs-corners">
-        <span class="lab__art" :style="{ backgroundImage: active.gradient }" aria-hidden="true" />
+        <span
+          class="lab__art"
+          :style="{ backgroundImage: active.imageUrl ? `url('${active.imageUrl}')` : active.gradient, backgroundSize: 'cover', backgroundPosition: 'center' }"
+          aria-hidden="true"
+        />
         <div class="lab__subjecttext">
           <h2 class="lab__subjecttitle">{{ active.title }}</h2>
           <p class="lab__subjectdesc">{{ active.description }}</p>

@@ -69,7 +69,10 @@ onBeforeUnmount(() => clearTimeout(timer))
     <template v-else>
       <p class="sb__logline">{{ storyboard.logline }}</p>
 
-      <div class="sb__stage cs-corners" :style="{ backgroundImage: frame?.gradient }">
+      <div
+        class="sb__stage cs-corners"
+        :style="{ backgroundImage: frame?.imageUrl ? `url('${frame.imageUrl}')` : frame?.gradient, backgroundSize: 'cover', backgroundPosition: 'center' }"
+      >
         <p class="sb__frametag">FRAME {{ String(index + 1).padStart(2, '0') }} / {{ String(frames.length).padStart(2, '0') }}</p>
         <h2 class="sb__frametitle">{{ frame?.title }}</h2>
         <p class="sb__frameprompt">{{ frame?.prompt }}</p>
@@ -84,7 +87,11 @@ onBeforeUnmount(() => clearTimeout(timer))
       <ol class="sb__frames">
         <li v-for="(item, i) in frames" :key="item.id">
           <button type="button" class="sb__thumb" :data-active="i === index" @click="seek(i)">
-            <span class="sb__thumbart" :style="{ backgroundImage: item.gradient }" aria-hidden="true" />
+            <span
+              class="sb__thumbart"
+              :style="{ backgroundImage: item.imageUrl ? `url('${item.imageUrl}')` : item.gradient, backgroundSize: 'cover', backgroundPosition: 'center' }"
+              aria-hidden="true"
+            />
             <span class="sb__thumbtext">
               <span class="sb__thumbtitle">{{ String(i + 1).padStart(2, '0') }} · {{ item.title }}</span>
               <span class="sb__thumbmeta tnum">{{ item.duration }}S · {{ item.transition }}</span>
@@ -128,4 +135,3 @@ onBeforeUnmount(() => clearTimeout(timer))
 .sb__actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1.5rem; }
 @media (max-width: 480px) { .sb { padding: 1.25rem 0.85rem 3rem; } }
 </style>
-

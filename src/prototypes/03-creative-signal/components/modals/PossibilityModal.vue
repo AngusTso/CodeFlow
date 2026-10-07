@@ -49,7 +49,11 @@ const parentTitle = computed(() => {
     <ul class="pos__list">
       <li v-for="(node, index) in nodes" :key="node.id">
         <div class="pos__card" :data-recommended="node.recommended">
-          <span class="pos__art" :style="{ backgroundImage: node.gradient }" aria-hidden="true" />
+          <span
+            class="pos__art"
+            :style="{ backgroundImage: node.imageUrl ? `url('${node.imageUrl}')` : node.gradient, backgroundSize: 'cover', backgroundPosition: 'center' }"
+            aria-hidden="true"
+          />
 
           <div class="pos__body">
             <p class="pos__index">

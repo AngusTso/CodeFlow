@@ -18,6 +18,7 @@
  *   and if speech APIs are missing it says so and points at the text field.
  */
 import { computed, nextTick, ref } from 'vue'
+import { sceneArtworkFor } from '../../../shared/data/mockData.js'
 import { useRouter, useStore } from '../composables.js'
 import { SUGGESTED_SIGNALS, VOICE_SCRIPT } from '../navigation.js'
 import AiStatus from '../components/ui/AiStatus.vue'
@@ -35,29 +36,35 @@ const mode = ref('text')
 const INPUT_MODES = [
   { id: 'voice', label: 'VOICE', icon: 'mic' },
   { id: 'text', label: 'TEXT', icon: 'pencil' },
+  { id: 'character', label: 'CHARACTER', icon: 'user' },
   { id: 'sketch', label: 'DRAW', icon: 'image' },
   { id: 'image', label: 'IMAGE', icon: 'layers' },
 ]
 
 /**
- * Mock image references (brief section 12).
- *
- * Gradients rather than bitmaps: the brief asks for a limited, coherent image
- * set that can be inlined, and AGENTS.md forbids depending on external image
- * URLs. Each ref carries a real `aria-label`, so the choice is accessible
- * without any image being downloaded.
+ * Local image references used as creative seeds; the mock does not claim to
+ * analyse the selected image.
  */
 const IMAGE_REFS = [
-  { id: 'a', label: 'RAIN ON GLASS', gradient: 'linear-gradient(135deg,#00e5ff,#1e2733)' },
-  { id: 'b', label: 'CONCRETE SKY', gradient: 'linear-gradient(135deg,#ff2bd6,#8b5cff)' },
-  { id: 'c', label: 'GREEN MACHINE', gradient: 'linear-gradient(135deg,#39ff88,#00e5ff)' },
-  { id: 'd', label: 'SOLAR VOID', gradient: 'linear-gradient(135deg,#ffe66d,#ff2bd6)' },
+  { id: 'a', label: 'CYBERPUNK NIGHT', ...sceneArtworkFor('sci-fi', 'cyberpunk neon night') },
+  { id: 'b', label: 'CITY PLAZA', ...sceneArtworkFor('urban', 'modern city plaza') },
+  { id: 'c', label: 'FLOWER FIELD', ...sceneArtworkFor('nature', 'flower field') },
+  { id: 'd', label: 'GLASSY ABSTRACT', ...sceneArtworkFor('abstract', 'glassy abstract light') },
 ]
 
 const draft = ref('')
 /** Ref to the text field, used to keep keyboard focus predictable. */
 const textField = ref(null)
+/** Character textarea — focused when the character surface opens. */
+const charField = ref(null)
 const sketchRef = ref(null)
+
+/** Starter ideas for the CHARACTER signal surface. */
+const CHARACTER_IDEAS = [
+  'The last gardener on a dead planet, still talking to the seeds.',
+  'A detective who lives inside a machine that is still running.',
+  'A courier who delivers apologies nobody asked for.',
+]
 
 const busy = computed(() => store.state.ai.busy)
 const voice = computed(() => store.state.voice)
@@ -70,6 +77,16 @@ async function selectMode(next) {
     await nextTick()
     textField.value?.focus()
   }
+  if (next === 'character') {
+    await nextTick()
+    charField.value?.focus()
+  }
+}
+
+/** Load a starter idea into the character field (does not submit). */
+function useCharacterIdea(value) {
+  draft.value = value
+  charField.value?.focus()
 }
 
 /** Use one of the suggested prompts (brief section 8.2). */
@@ -81,11 +98,12 @@ function useSuggestion(value) {
 
 /**
  * Send the current input as a Signal.
- * @param {'text'|'voice'|'sketch'|'image'} type
+ * @param {'text'|'voice'|'sketch'|'image'|'character'} type
  * @param {string} [content] - Overrides the draft (used by voice + sketch).
  * @param {string} [label] - Short human label shown in the Archive.
+ * @param {{imageUrl?: string, alt?: string}} [artwork] - Selected local image reference.
  */
-async function submitSignal(type, content, label) {
+async function submitSignal(type, content, label, artwork = {}) {
   if (busy.value) return
   const value = content ?? draft.value
   if (!value || !value.trim()) return
@@ -93,9 +111,16 @@ async function submitSignal(type, content, label) {
   await store.initializeSignal({
     content: value.trim(),
     type,
-    label: label || (type === 'text' ? value.trim() : undefined),
+    label:
+      label ||
+      (type === 'text'
+        ? value.trim()
+        : type === 'character'
+          ? value.trim().slice(0, 48)
+          : undefined),
     gradient: type === 'sketch' ? sketchRef.value?.dataUrl : undefined,
-    alt: type === 'sketch' ? 'Rough sketch supplied as a creative signal' : undefined,
+    imageUrl: artwork.imageUrl,
+    alt: artwork.alt || (type === 'sketch' ? 'Rough sketch supplied as a creative signal' : undefined),
   })
 
   // Only advance on success, so a failed signal leaves the user here.
@@ -257,6 +282,52 @@ function acceptVoice() {
       />
     </div>
 
+    <!-- ======================= CHARACTER ======================= -->
+    <form
+      v-else-if="mode === 'character'"
+      class="signal__panel cs-corners"
+      @submit.prevent="submitSignal('character')"
+    >
+      <label class="eyebrow" for="signal-character">CHARACTER SIGNAL</label>
+      <p class="signal__note">
+        Describe a character — name them, or just say what they want. They become
+        the root of your universe and every direction grows around them.
+      </p>
+      <textarea
+        id="signal-character"
+        ref="charField"
+        v-model="draft"
+        class="field signal__input"
+        rows="3"
+        placeholder="e.g. The last gardener on a dead planet, still talking to the seeds."
+        :disabled="busy"
+      />
+      <div class="signal__suggest">
+        <p class="eyebrow">STARTER CHARACTERS</p>
+        <ul class="signal__chips">
+          <li v-for="idea in CHARACTER_IDEAS" :key="idea">
+            <button
+              type="button"
+              class="signal__chip"
+              :disabled="busy"
+              @click="useCharacterIdea(idea)"
+            >
+              {{ idea }}
+            </button>
+          </li>
+        </ul>
+      </div>
+      <SigButton
+        type="submit"
+        tone="primary"
+        size="lg"
+        icon="arrowRight"
+        :disabled="busy || !draft.trim()"
+      >
+        ADD CHARACTER TO UNIVERSE
+      </SigButton>
+    </form>
+
     <!-- ======================= IMAGE ======================= -->
     <div v-else class="signal__panel cs-corners">
       <p class="eyebrow">IMAGE SIGNAL</p>
@@ -269,10 +340,14 @@ function acceptVoice() {
           <button
             type="button"
             class="signal__ref"
-            :style="{ backgroundImage: ref.gradient }"
+            :style="{
+              backgroundImage: `url('${ref.imageUrl}')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }"
             :disabled="busy"
-            :aria-label="`Use ${ref.label} as the image signal`"
-            @click="submitSignal('image', ref.label, ref.label)"
+            :aria-label="`Use ${ref.label} as the image signal. ${ref.alt}`"
+            @click="submitSignal('image', ref.label, ref.label, ref)"
           >
             <span class="signal__reflabel">{{ ref.label }}</span>
           </button>

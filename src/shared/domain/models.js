@@ -57,7 +57,9 @@ import { uid } from '../utils/random.js'
  * @property {number} duration     Seconds.
  * @property {SceneOrigin} origin  Rendered as a badge on the clip.
  * @property {string|null} sceneId Link to the scene for VIDEO clips.
- * @property {string} gradient     Placeholder colour for the clip thumbnail.
+ * @property {string} gradient     Fallback background for the clip thumbnail.
+ * @property {string|null} imageUrl Local scene artwork, when present.
+ * @property {string} alt           Accessible description of the artwork.
  */
 
 /**
@@ -350,6 +352,8 @@ export function createTimelineClip(overrides = {}) {
     origin: 'ai-generated',
     sceneId: null,
     gradient: 'linear-gradient(135deg, #2a3442 0%, #1f2833 100%)',
+    imageUrl: null,
+    alt: '',
     ...overrides,
   }
 }

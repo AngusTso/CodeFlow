@@ -58,13 +58,17 @@ const techLine = computed(() => {
     class="group block w-full overflow-hidden rounded-lg border text-left transition-colors"
     :class="selected ? 'border-accent bg-elevated' : 'border-line bg-surface hover:border-[#3a4552] hover:bg-elevated'"
     :aria-pressed="selected"
-    :aria-label="`Scene ${number}. ${scene.title}. ${origin ? origin.label : 'Origin unknown'}.`"
+    :aria-label="`Scene ${number}. ${scene.title}. ${scene.alt} ${origin ? origin.label : 'Origin unknown'}.`"
     @click="$emit('select', scene.id)"
   >
-    <!-- Frame: the gradient stands in for a rendered still. -->
+    <!-- The supplied still is a visual reference, not a generated video frame. -->
     <span
       class="relative block h-24 w-full"
-      :style="{ background: scene.gradient }"
+      :style="{
+        backgroundImage: scene.imageUrl ? `url('${scene.imageUrl}')` : scene.gradient,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }"
       aria-hidden="true"
     >
       <span class="absolute left-2 top-2 rounded bg-canvas/70 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-ink">

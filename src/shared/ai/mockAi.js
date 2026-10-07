@@ -48,6 +48,7 @@ import {
   byId,
   labelOf,
   gradientFor,
+  sceneArtworkFor,
   LENSES,
   MOVEMENTS,
   FRAMINGS,
@@ -160,6 +161,7 @@ export function buildScene(rng, index, { type }) {
   const style = pick(rng, STYLES).id
   const lighting = pick(rng, LIGHTING).id
   const transition = pick(rng, TRANSITIONS).id
+  const artwork = sceneArtworkFor(safeType, `${title} ${fragment}`, index)
 
   return createScene({
     order: index + 1,
@@ -176,7 +178,8 @@ export function buildScene(rng, index, { type }) {
     duration: intBetween(rng, 4, 9),
     transition,
     gradient: gradientFor(safeType, index),
-    alt: `Placeholder artwork for scene ${index + 1}: ${fragment}`,
+    ...artwork,
+    alt: `${artwork.alt} Scene ${index + 1}: ${title}.`,
   })
 }
 
@@ -293,7 +296,8 @@ export function generateCharacter(options = {}) {
     expression: options.expression || pick(rng, CHARACTER_EXPRESSIONS),
     pose: options.pose || template.pose,
     gradient: `linear-gradient(135deg, ${from} 0%, ${to} 100%)`,
-    alt: `Placeholder artwork for the ${template.archetype} character`,
+    imageUrl: template.imageUrl,
+    alt: `${template.alt} Character: ${template.archetype}, ${template.name}.`,
   })
 
   return simulate(character, 950)

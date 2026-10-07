@@ -107,8 +107,9 @@ function startCreating() {
         <li v-for="project in recent" :key="project.id">
           <article class="overflow-hidden rounded-2xl border border-line bg-surface shadow-sm">
             <PlaceholderArt
+              :image-url="project.imageUrl || ''"
               :gradient="gradientFor(project.type, project.scenes)"
-              :alt="`Placeholder artwork for ${project.title}`"
+              :alt="project.alt || `Artwork for ${project.title}`"
               rounded="rounded-none"
               class="aspect-video w-full"
             />

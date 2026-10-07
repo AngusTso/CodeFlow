@@ -37,6 +37,7 @@ import { uid } from '../../shared/utils/random.js'
  * @property {string} source    Where it came from: 'text' | 'voice' | 'sketch' | 'image' | 'ai'
  * @property {string[]} chips   Extracted creative signal keywords (section 9.1).
  * @property {string} gradient  Placeholder artwork for image/sketch signals.
+ * @property {string|null} imageUrl Local reference image, when supplied.
  * @property {string} alt       Accessible description of any visual content.
  */
 
@@ -54,6 +55,7 @@ export function createSignal(overrides = {}) {
     source: 'text',
     chips: [],
     gradient: 'linear-gradient(135deg, #00e5ff 0%, #8b5cff 100%)',
+    imageUrl: null,
     alt: '',
     ...overrides,
   }
@@ -82,7 +84,8 @@ export function createSignal(overrides = {}) {
  * @property {string} id
  * @property {string} title            e.g. "THE FOREST UNDER THE CITY"
  * @property {string} description      One line of what this possibility is.
- * @property {string} gradient         Placeholder artwork (visual continuity, s.54)
+ * @property {string} gradient         Fallback artwork (visual continuity, s.54)
+ * @property {string|null} imageUrl    Local artwork matched to the possibility.
  * @property {string} alt              Accessible description of the artwork.
  * @property {string[]} signals        The signal titles this node was built from.
  * @property {string|null} parentId    Null for a root (the initial universe).
@@ -107,6 +110,7 @@ export function createNode(overrides = {}) {
     title: 'UNTITLED POSSIBILITY',
     description: '',
     gradient: 'linear-gradient(135deg, #10151c 0%, #1e2733 100%)',
+    imageUrl: null,
     alt: '',
     signals: [],
     parentId: null,
@@ -235,6 +239,7 @@ export function createStabilizedConcept(overrides = {}) {
  * @property {string} code       Display code, e.g. "SIGNAL 01"
  * @property {string} title
  * @property {string} gradient
+ * @property {string|null} imageUrl
  * @property {string} alt
  * @property {string} stamp      Short timestamp label.
  * @property {string|null} nodeId  Node to restore, when the entry maps to one.
@@ -252,6 +257,7 @@ export function createArchiveEntry(overrides = {}) {
     code: 'MEMORY',
     title: '',
     gradient: 'linear-gradient(135deg, #10151c 0%, #1e2733 100%)',
+    imageUrl: null,
     alt: '',
     stamp: '',
     nodeId: null,

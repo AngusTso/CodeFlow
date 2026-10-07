@@ -30,6 +30,7 @@
 
 import { createRng, pick, intBetween, shuffle } from '../../shared/utils/random.js'
 import { delay, simulate } from '../../shared/utils/async.js'
+import { artworkForText } from '../../shared/data/mockData.js'
 // Aliased on import: this file also EXPORTS a function of the same name (the
 // brief's section 74.3 API), so the shared generator needs an unambiguous
 // local name. `sharedGenerateStoryboard` is still the SAME shared function
@@ -314,26 +315,42 @@ export function buildInitialUniverse(signal) {
   const seed = `universe:${signal.content}`
   const rng = createRng(seed)
   const kernel = kernelOf(signal.label || signal.content)
+  const isCharacter = signal.type === 'character'
+  // CHARACTER signals orbit the person, not a place.
+  const subject = kernel === 'SIGNAL' ? 'THE CHARACTER' : kernel
 
   // The four satellites are the directions the raw signal could become. They
   // reuse the brief's own example concepts so the demo reads as intended.
-  const satelliteTitles = shuffle(rng, [
-    `NEON ${kernel === 'SIGNAL' ? 'CITY' : kernel}`,
-    `ABANDONED ${pick(rng, ['FOREST', 'STATION', 'GARDEN'])}`,
-    'THE LAST HUMAN STREET',
-    'CITY WITHOUT SUNLIGHT',
-  ]).slice(0, 4)
+  const satelliteTitles = (
+    isCharacter
+      ? [
+          `A DAY IN THE LIFE OF ${subject}`,
+          `BEFORE ${subject}`,
+          `${subject}, THE LAST ONE`,
+          `WHAT ${subject} DREAMS ABOUT`,
+        ]
+      : shuffle(rng, [
+          `NEON ${kernel === 'SIGNAL' ? 'CITY' : kernel}`,
+          `ABANDONED ${pick(rng, ['FOREST', 'STATION', 'GARDEN'])}`,
+          'THE LAST HUMAN STREET',
+          'CITY WITHOUT SUNLIGHT',
+        ])
+  ).slice(0, 4)
+
+  const signalTag = isCharacter ? 'CHARACTER' : signal.label || 'SIGNAL'
 
   // Ring layout: radius 300px around the root, 4 evenly spaced slots.
   const RADIUS = 300
   const satellites = satelliteTitles.map((title, index) => {
     const angle = (Math.PI * 2 * index) / satelliteTitles.length - Math.PI / 4
+    const artwork = artworkForText(title, index)
     return createNode({
       title: titleCase(title),
       description: `A direction suggested by “${signal.label || signal.content}”.`,
       gradient: gradientForSeed(`${seed}:${index}`, index),
-      alt: `Generated visual placeholder for the possibility ${titleCase(title)}`,
-      signals: [signal.label || 'SIGNAL'],
+      ...artwork,
+      alt: `${artwork.alt} Concept: ${titleCase(title)}.`,
+      signals: [signalTag],
       depth: 1,
       createdFrom: 'signal',
       position: {
@@ -344,12 +361,16 @@ export function buildInitialUniverse(signal) {
   })
 
   // The root sits at the centre, so the universe always opens centred.
+  const rootArtwork = artworkForText(signal.label || signal.content)
   const root = createNode({
     title: titleCase(signal.label || kernel),
     description: signal.content || 'The originating signal.',
     gradient: gradientForSeed(`${seed}:root`, 0),
-    alt: `Origin signal: ${signal.label || signal.content}`,
-    signals: [signal.label || 'SIGNAL'],
+    imageUrl: signal.imageUrl || rootArtwork.imageUrl,
+    alt: signal.imageUrl
+      ? signal.alt
+      : `${rootArtwork.alt} Origin signal: ${signal.label || signal.content}.`,
+    signals: [signalTag],
     depth: 0,
     createdFrom: 'signal',
     position: { x: 0, y: 0 },
@@ -404,6 +425,7 @@ export function buildSynthesis(sources, mode = 'unexpected') {
     .slice(0, 3)
     .join(' and ')} in ${mode} mode, where two unrelated visual languages have to share one frame.`
 
+  const artwork = artworkForText(title, 3)
   const node = createNode({
     title,
     description: reason,
@@ -411,7 +433,8 @@ export function buildSynthesis(sources, mode = 'unexpected') {
     // this possibility exists without needing the synthesis record.
     reason,
     gradient: gradientForSeed(seed, 3),
-    alt: `Generated visual placeholder for the synthesised possibility ${title}`,
+    ...artwork,
+    alt: `${artwork.alt} Synthesised possibility: ${title}.`,
     signals: sourceTitles,
     depth: 1,
     createdFrom: 'synthesis',
@@ -458,11 +481,13 @@ export function buildAlternatives(node) {
 
   const nodes = templates.map((template, index) => {
     const title = titleCase(template.replace('{A}', kernel))
+    const artwork = artworkForText(title, index)
     return createNode({
       title,
       description: `An alternative reading of ${node.title}.`,
       gradient: gradientForSeed(`${seed}:${index}`, index + 1),
-      alt: `Generated visual placeholder for the alternative ${title}`,
+      ...artwork,
+      alt: `${artwork.alt} Alternative concept: ${title}.`,
       signals: node.signals.length ? node.signals : [node.title],
       parentId: node.id,
       depth: node.depth + 1,
@@ -531,12 +556,14 @@ export function buildBranches(node) {
 export function buildBranchNode(node, branch, index) {
   const seed = `branchnode:${branch.id}`
   const title = titleCase(`${node.title} // ${branch.direction}`)
+  const artwork = artworkForText(title, index)
 
   return createNode({
     title,
     description: `${branch.direction} interpretation of ${node.title}.`,
     gradient: gradientForSeed(`${seed}:${index}`, index + 2),
-    alt: `Generated visual placeholder for the branch ${title}`,
+    ...artwork,
+    alt: `${artwork.alt} Branch concept: ${title}.`,
     signals: node.signals.length ? node.signals : [node.title],
     parentId: node.id,
     depth: node.depth + 1,

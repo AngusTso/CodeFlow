@@ -7,25 +7,158 @@
  *   mock data, so this is the ONE place that data lives. Prototypes 02 and 03
  *   will import from here unchanged.
  *
- * IMAGE SLOTS — WHERE TO PUT REAL ARTWORK
+ * LOCAL ARTWORK
  * ---------------------------------------------------------------------------
- *   This prototype ships with CSS-gradient placeholders instead of images so
- *   the deliverable stays a single, self-contained HTML file with no external
- *   requests (an AGENTS.md requirement).
- *
- *   TO USE REAL IMAGES:
- *     1. Put your file in `src/prototypes/01-code-flow/assets/` (create it).
- *     2. Import it at the top of this file, e.g.
- *          import urbanShot from '../prototypes/01-code-flow/assets/urban.jpg'
- *        (Vite turns the import into a base64 data-URI at build time because
- *        `build.assetsInlineLimit` is set very high in vite.config.js.)
- *     3. Set `imageUrl` on the relevant entry below, e.g.
- *          imageUrl: urbanShot
- *   <SceneCard>, <TemplateCard> and <CharacterCard> automatically render an
- *   <img> when `imageUrl` is set and fall back to the gradient when it is null.
- *   The generated scenes created by mockAi.js also accept an `imageUrl`.
+ *   Vite imports the local WebP catalogue and inlines it into each standalone
+ *   HTML deliverable. Artwork stays available offline and never uses a remote
+ *   image service.
  * ---------------------------------------------------------------------------
  */
+
+const PICTURE_URLS = {
+  'abstract/Boxes_scene.webp': new URL('../picture/abstract/Boxes_scene.webp', import.meta.url).href,
+  'abstract/Glassy_scene.webp': new URL('../picture/abstract/Glassy_scene.webp', import.meta.url).href,
+  'abstract/Vanilla_scene.webp': new URL('../picture/abstract/Vanilla_scene.webp', import.meta.url).href,
+  'character/CartoonAdventurer.webp': new URL('../picture/character/CartoonAdventurer.webp', import.meta.url).href,
+  'character/CartoonBusinessMan.webp': new URL('../picture/character/CartoonBusinessMan.webp', import.meta.url).href,
+  'character/CartoonMan.webp': new URL('../picture/character/CartoonMan.webp', import.meta.url).href,
+  'character/IllustrationFemaleMechanic.webp': new URL('../picture/character/IllustrationFemaleMechanic.webp', import.meta.url).href,
+  'character/RealisticArmy.webp': new URL('../picture/character/RealisticArmy.webp', import.meta.url).href,
+  'fantasy/Assasain_scene.webp': new URL('../picture/fantasy/Assasain_scene.webp', import.meta.url).href,
+  'fantasy/ElfHouse_scene.webp': new URL('../picture/fantasy/ElfHouse_scene.webp', import.meta.url).href,
+  'fantasy/FortuneTeller_scene.webp': new URL('../picture/fantasy/FortuneTeller_scene.webp', import.meta.url).href,
+  'fantasy/Princess_scene.webp': new URL('../picture/fantasy/Princess_scene.webp', import.meta.url).href,
+  'fantasy/Witcher_scene.webp': new URL('../picture/fantasy/Witcher_scene.webp', import.meta.url).href,
+  'nature/FlowerField_scene.webp': new URL('../picture/nature/FlowerField_scene.webp', import.meta.url).href,
+  'nature/Lake_scene.webp': new URL('../picture/nature/Lake_scene.webp', import.meta.url).href,
+  'nature/Mountain_scene.webp': new URL('../picture/nature/Mountain_scene.webp', import.meta.url).href,
+  'nature/Mushroom_scene.webp': new URL('../picture/nature/Mushroom_scene.webp', import.meta.url).href,
+  'nature/Volcano_scene.webp': new URL('../picture/nature/Volcano_scene.webp', import.meta.url).href,
+  'profile/Boy_profile.webp': new URL('../picture/profile/Boy_profile.webp', import.meta.url).href,
+  'profile/Girl_profile.webp': new URL('../picture/profile/Girl_profile.webp', import.meta.url).href,
+  'sci-fi/AntAlienInvasion_scene.webp': new URL('../picture/sci-fi/AntAlienInvasion_scene.webp', import.meta.url).href,
+  'sci-fi/CyberpunkNight_scene.webp': new URL('../picture/sci-fi/CyberpunkNight_scene.webp', import.meta.url).href,
+  'sci-fi/Mars_scene.webp': new URL('../picture/sci-fi/Mars_scene.webp', import.meta.url).href,
+  'sci-fi/SpaceStation_scene.webp': new URL('../picture/sci-fi/SpaceStation_scene.webp', import.meta.url).href,
+  'sci-fi/Space_scene.webp': new URL('../picture/sci-fi/Space_scene.webp', import.meta.url).href,
+  'urban/Carpark_scene.webp': new URL('../picture/urban/Carpark_scene.webp', import.meta.url).href,
+  'urban/City_scene.webp': new URL('../picture/urban/City_scene.webp', import.meta.url).href,
+  'urban/RIverside_scene.webp': new URL('../picture/urban/RIverside_scene.webp', import.meta.url).href,
+  'urban/Town_scene.webp': new URL('../picture/urban/Town_scene.webp', import.meta.url).href,
+  'urban/Underground_scene.webp': new URL('../picture/urban/Underground_scene.webp', import.meta.url).href,
+}
+
+function pictureUrl(category, filename) {
+  const path = `${category}/${filename}`
+  const url = PICTURE_URLS[path]
+  if (!url) throw new Error(`Missing local mock artwork: ${path}`)
+  return url
+}
+
+const SCENE_ARTWORK = {
+  urban: [
+    { file: 'City_scene.webp', alt: 'A paved city plaza framed by modern office buildings.', words: ['city', 'urban', 'neon', 'street', 'skyline'] },
+    { file: 'Carpark_scene.webp', alt: 'A multi-level car park at night.', words: ['car', 'parking', 'garage'] },
+    { file: 'RIverside_scene.webp', alt: 'A riverside walkway beside the city.', words: ['river', 'riverside', 'waterfront'] },
+    { file: 'Town_scene.webp', alt: 'A quiet town street lined with buildings.', words: ['town', 'village', 'cafe', 'café', 'bakery'] },
+    { file: 'Underground_scene.webp', alt: 'An underground urban passage.', words: ['underground', 'subway', 'tunnel', 'station'] },
+  ],
+  nature: [
+    { file: 'FlowerField_scene.webp', alt: 'A field of flowers in soft daylight.', words: ['flower', 'field', 'wildflower', 'meadow', 'garden'] },
+    { file: 'Lake_scene.webp', alt: 'A calm lake surrounded by nature.', words: ['lake', 'waterfall', 'river', 'shore', 'water'] },
+    { file: 'Mountain_scene.webp', alt: 'A lone hiker looking across a mountain range at sunset.', words: ['mountain', 'ridge', 'peak', 'hiker'] },
+    { file: 'Mushroom_scene.webp', alt: 'Mushrooms growing on a forest floor.', words: ['mushroom', 'forest', 'woods', 'moss'] },
+    { file: 'Volcano_scene.webp', alt: 'A volcanic landscape.', words: ['volcano', 'lava', 'eruption'] },
+  ],
+  'sci-fi': [
+    { file: 'AntAlienInvasion_scene.webp', alt: 'An alien invasion approaches a futuristic world.', words: ['alien', 'invasion', 'attack'] },
+    { file: 'CyberpunkNight_scene.webp', alt: 'A neon-lit cyberpunk city at night.', words: ['cyberpunk', 'neon', 'rain', 'night', 'signal'] },
+    { file: 'Mars_scene.webp', alt: 'A distant view across the surface of Mars.', words: ['mars', 'red planet', 'desert'] },
+    { file: 'SpaceStation_scene.webp', alt: 'The interior of a bright futuristic space station.', words: ['station', 'orbital', 'corridor', 'control'] },
+    { file: 'Space_scene.webp', alt: 'A spacecraft traveling through deep space.', words: ['space', 'planet', 'orbit', 'star', 'galaxy'] },
+  ],
+  fantasy: [
+    { file: 'Assasain_scene.webp', alt: 'A fantasy assassin moves through a shadowy setting.', words: ['assassin', 'assasain', 'stealth', 'shadow'] },
+    { file: 'ElfHouse_scene.webp', alt: 'A fantastical home among woodland surroundings.', words: ['elf', 'woodland', 'home', 'house'] },
+    { file: 'FortuneTeller_scene.webp', alt: 'A fortune teller reads signs in a mystical setting.', words: ['fortune', 'oracle', 'prophecy', 'teller'] },
+    { file: 'Princess_scene.webp', alt: 'A princess in a fantasy setting.', words: ['princess', 'queen', 'royal', 'castle'] },
+    { file: 'Witcher_scene.webp', alt: 'A cloaked fantasy wanderer in a forest.', words: ['witcher', 'wandering', 'ruins', 'knight', 'hero'] },
+  ],
+  abstract: [
+    { file: 'Boxes_scene.webp', alt: 'Geometric boxes arranged as an abstract composition.', words: ['box', 'geometry', 'shape'] },
+    { file: 'Glassy_scene.webp', alt: 'A translucent glass-like abstract composition.', words: ['glass', 'crystal', 'transparent', 'light'] },
+    { file: 'Vanilla_scene.webp', alt: 'A soft, minimal abstract composition in warm tones.', words: ['soft', 'minimal', 'warm', 'pastel'] },
+  ],
+}
+
+const CHARACTER_ARTWORK = {
+  'futuristic-mechanic': {
+    imageUrl: pictureUrl('character', 'IllustrationFemaleMechanic.webp'),
+    alt: 'An illustrated female mechanic in work clothes, standing with her hands on her hips.',
+  },
+  'fantasy-warrior': {
+    imageUrl: pictureUrl('character', 'CartoonAdventurer.webp'),
+    alt: 'A colorful illustrated fantasy adventurer standing ready for a journey.',
+  },
+  'casual-vlogger': {
+    imageUrl: pictureUrl('character', 'CartoonMan.webp'),
+    alt: 'A friendly cartoon man wearing a blue shirt and cap.',
+  },
+  'creative-producer': {
+    imageUrl: pictureUrl('character', 'CartoonBusinessMan.webp'),
+    alt: 'An illustrated business professional in smart attire.',
+  },
+  'frontier-scout': {
+    imageUrl: pictureUrl('character', 'RealisticArmy.webp'),
+    alt: 'A futuristic armored scout wearing a visor and utility gear.',
+  },
+}
+
+/**
+ * Select a local scene image that best fits its category and descriptive text.
+ * The variant provides deterministic variety when no semantic keyword matches.
+ */
+export function sceneArtworkFor(typeId, subject = '', variant = 0) {
+  const category = SCENE_ARTWORK[typeId] ? typeId : 'urban'
+  const text = String(subject).toLowerCase()
+  if (category === 'urban' && /\b(cyberpunk|neon|rain|rainy)\b/.test(text)) {
+    const artwork = SCENE_ARTWORK['sci-fi'][1]
+    return {
+      imageUrl: pictureUrl('sci-fi', artwork.file),
+      alt: artwork.alt,
+    }
+  }
+  const bank = SCENE_ARTWORK[category]
+  const scored = bank.map((artwork) => ({
+    artwork,
+    score: artwork.words.reduce((score, word) => score + (text.includes(word) ? 1 : 0), 0),
+  }))
+  const bestScore = Math.max(...scored.map((entry) => entry.score))
+  const candidates = bestScore
+    ? scored.filter((entry) => entry.score === bestScore).map((entry) => entry.artwork)
+    : bank
+  const artwork = candidates[((variant % candidates.length) + candidates.length) % candidates.length]
+  return {
+    imageUrl: pictureUrl(category, artwork.file),
+    alt: artwork.alt,
+  }
+}
+
+/** Pick the scene category and image most relevant to a free-form idea. */
+export function artworkForText(subject = '', variant = 0) {
+  const text = String(subject).toLowerCase()
+  const categoryWords = {
+    urban: ['city', 'street', 'urban', 'town', 'neon', 'subway', 'carpark'],
+    nature: ['forest', 'nature', 'flower', 'field', 'lake', 'mountain', 'river', 'volcano', 'mushroom'],
+    'sci-fi': ['space', 'planet', 'sci-fi', 'sci fi', 'station', 'alien', 'mars', 'cyberpunk', 'orbital'],
+    fantasy: ['fantasy', 'elf', 'assassin', 'witcher', 'princess', 'fortune', 'castle', 'knight'],
+    abstract: ['abstract', 'colour', 'color', 'glass', 'geometry', 'shape'],
+  }
+  const category = Object.entries(categoryWords)
+    .map(([id, words]) => ({ id, score: words.reduce((score, word) => score + (text.includes(word) ? 1 : 0), 0) }))
+    .sort((left, right) => right.score - left.score)[0]
+  return sceneArtworkFor(category?.score ? category.id : 'abstract', subject, variant)
+}
 
 /* ========================================================================== */
 /* 1. Scene generation parameters (assignment "Scene Generation" module)      */
@@ -33,7 +166,7 @@
 
 /**
  * Scene types the user can choose from.
- * `palette` = two hex colours used to build the placeholder gradient.
+ * `palette` = two hex colours retained as a resilient image fallback.
  * `glyph` = a text glyph shown on the placeholder (avoids icon-font deps).
  * @type {{id: string, label: string, glyph: string, palette: [string, string]}[]}
  */
@@ -44,6 +177,11 @@ export const SCENE_TYPES = [
   { id: 'fantasy', label: 'Fantasy', glyph: '🪄', palette: ['#9333ea', '#f59e0b'] },
   { id: 'abstract', label: 'Abstract', glyph: '🎨', palette: ['#f43f5e', '#fbbf24'] },
 ]
+
+export const PROFILE_ARTWORK = {
+  imageUrl: pictureUrl('profile', 'Girl_profile.webp'),
+  alt: 'Profile portrait of a smiling young woman with dark hair.',
+}
 
 /** Mood presets. `id` is stored on the Scene; `label` is shown to the user. */
 export const MOODS = [
@@ -221,9 +359,10 @@ export const VIDEO_TEMPLATES = [
   {
     id: 'neon-city',
     title: 'Neon City Nights',
-    description: 'Moody cyberpunk streets, rain, reflections and neon signs.',
+    description: 'Rain-dark streets glow beneath the neon signs of a cyberpunk city.',
     prompt: 'A cyberpunk city at night with neon lights and rain-slicked streets',
     type: 'urban',
+    ...sceneArtworkFor('sci-fi', 'cyberpunk city neon rain'),
     glyph: '🌃',
     sceneCount: 5,
     duration: 30,
@@ -234,6 +373,7 @@ export const VIDEO_TEMPLATES = [
     description: 'Calm nature b-roll that breathes slowly.',
     prompt: 'A quiet escape into misty forests and mountain rivers',
     type: 'nature',
+    ...sceneArtworkFor('nature', 'misty forest mountain river'),
     glyph: '🏞',
     sceneCount: 4,
     duration: 25,
@@ -244,6 +384,7 @@ export const VIDEO_TEMPLATES = [
     description: 'Clean sci-fi station footage with drifting planets.',
     prompt: 'A space station drifting past a ringed planet at slow speed',
     type: 'sci-fi',
+    ...sceneArtworkFor('sci-fi', 'space station planet orbit'),
     glyph: '🚀',
     sceneCount: 5,
     duration: 30,
@@ -251,9 +392,10 @@ export const VIDEO_TEMPLATES = [
   {
     id: 'cozy-morning',
     title: 'Cozy Morning',
-    description: 'Warm, friendly slice-of-life for vlogs.',
-    prompt: 'A warm morning routine in a small sunlit apartment',
+    description: 'A gentle morning stroll through a quiet, sunlit town.',
+    prompt: 'A warm morning stroll through a quiet small town',
     type: 'nature',
+    ...sceneArtworkFor('urban', 'quiet town morning'),
     glyph: '☕️',
     sceneCount: 4,
     duration: 20,
@@ -264,6 +406,7 @@ export const VIDEO_TEMPLATES = [
     description: 'Fantasy ruins, lanterns and glowing moss.',
     prompt: 'A hero walking through ancient overgrown ruins at dusk',
     type: 'fantasy',
+    ...sceneArtworkFor('fantasy', 'hero walking through forest ruins'),
     glyph: '🗝',
     sceneCount: 5,
     duration: 35,
@@ -271,9 +414,10 @@ export const VIDEO_TEMPLATES = [
   {
     id: 'colour-study',
     title: 'Colour Study',
-    description: 'Abstract motion graphics for ads and idents.',
+    description: 'Translucent glass forms fold and drift through soft light.',
     prompt: 'Abstract ribbons of colour folding through empty space',
     type: 'abstract',
+    ...sceneArtworkFor('abstract', 'glassy soft light'),
     glyph: '🎨',
     sceneCount: 3,
     duration: 15,
@@ -289,63 +433,68 @@ export const VIDEO_TEMPLATES = [
  *
  * @type {{id: string, archetype: string, name: string, description: string,
  *         outfit: string, expression: string, pose: string,
- *         glyph: string, palette: [string, string]}[]}
+ *         glyph: string, palette: [string, string], imageUrl: string, alt: string}[]}
  */
 export const CHARACTER_TEMPLATES = [
   {
-    id: 'futuristic-detective',
-    archetype: 'Futuristic Detective',
-    name: 'Detective Vale',
-    description: 'A sharp-eyed investigator working the neon underbelly.',
-    outfit: 'Raincoat and visor',
-    expression: 'Narrowed, focused',
-    pose: 'Scanning the scene',
-    glyph: '🕵️',
+    id: 'futuristic-mechanic',
+    archetype: 'Futuristic Mechanic',
+    name: 'Mara',
+    description: 'A resourceful mechanic who keeps a futuristic city running.',
+    outfit: 'Workshop coveralls',
+    expression: 'Confident and focused',
+    pose: 'Ready to repair a machine',
+    glyph: '⚙️',
     palette: ['#4f46e5', '#0ea5e9'],
+    ...CHARACTER_ARTWORK['futuristic-mechanic'],
   },
   {
     id: 'fantasy-warrior',
-    archetype: 'Fantasy Warrior',
+    archetype: 'Fantasy Adventurer',
     name: 'Kael',
-    description: 'A seasoned fighter carrying an old, heavy promise.',
+    description: 'A bright-eyed adventurer ready to set out on a new quest.',
     outfit: 'Weathered leather armour',
     expression: 'Determined',
-    pose: 'Ready for battle',
-    glyph: '⚔️',
+    pose: 'Standing ready for a journey',
+    glyph: '🧭',
     palette: ['#b45309', '#ef4444'],
+    ...CHARACTER_ARTWORK['fantasy-warrior'],
   },
   {
     id: 'casual-vlogger',
     archetype: 'Casual Vlogger',
-    name: 'Mia',
-    description: 'A friendly host who makes any topic feel approachable.',
-    outfit: 'Oversized hoodie',
+    name: 'Jordan',
+    description: 'A relaxed on-camera host who makes any topic feel approachable.',
+    outfit: 'Blue shirt and cap',
     expression: 'Warm smile',
     pose: 'Talking to camera',
     glyph: '🎙',
     palette: ['#f97316', '#ec4899'],
+    ...CHARACTER_ARTWORK['casual-vlogger'],
   },
   {
-    id: 'space-scientist',
-    archetype: 'Space Scientist',
-    name: 'Dr. Okafor',
-    description: 'A calm researcher logging discoveries far from home.',
-    outfit: 'Utility flight suit',
-    expression: 'Curious',
-    pose: 'Reviewing a hologram',
-    glyph: '🔬',
+    id: 'creative-producer',
+    archetype: 'Creative Producer',
+    name: 'Alex',
+    description: 'A polished producer shaping ideas into clear, memorable stories.',
+    outfit: 'Smart business attire',
+    expression: 'Confident and focused',
+    pose: 'Presenting a new idea',
+    glyph: '🎬',
     palette: ['#0891b2', '#8b5cf6'],
+    ...CHARACTER_ARTWORK['creative-producer'],
   },
   {
-    id: 'street-musician',
-    archetype: 'Street Musician',
-    name: 'Rui',
-    description: 'A busker whose songs stop commuters mid-step.',
-    outfit: 'Denim jacket and beanie',
-    expression: 'Eyes closed, singing',
-    pose: 'Playing guitar',
-    glyph: '🎸',
+    id: 'frontier-scout',
+    archetype: 'Frontier Scout',
+    name: 'Vale',
+    description: 'A field scout navigating dangerous terrain in protective gear.',
+    outfit: 'Armored field uniform',
+    expression: 'Alert and watchful',
+    pose: 'Scanning the horizon',
+    glyph: '🪖',
     palette: ['#7c3aed', '#f59e0b'],
+    ...CHARACTER_ARTWORK['frontier-scout'],
   },
 ]
 
@@ -458,10 +607,10 @@ export const FPS_OPTIONS = [24, 30, 60]
  *         type: string, progress: number}[]}
  */
 export const SAMPLE_PROJECTS = [
-  { id: 'p-1', title: 'Neon City Nights', scenes: 5, updated: 'Edited 2 hours ago', type: 'urban', progress: 100 },
-  { id: 'p-2', title: 'Morning Routine Vlog', scenes: 4, updated: 'Edited yesterday', type: 'nature', progress: 60 },
-  { id: 'p-3', title: 'Orbit Log — Ep. 3', scenes: 6, updated: 'Edited 3 days ago', type: 'sci-fi', progress: 100 },
-  { id: 'p-4', title: 'Festival Promo', scenes: 5, updated: 'Edited last week', type: 'abstract', progress: 30 },
+  { id: 'p-1', title: 'Neon City Nights', scenes: 5, updated: 'Edited 2 hours ago', type: 'urban', progress: 100, ...sceneArtworkFor('sci-fi', 'cyberpunk neon city') },
+  { id: 'p-2', title: 'Morning Routine Vlog', scenes: 4, updated: 'Edited yesterday', type: 'nature', progress: 60, ...sceneArtworkFor('urban', 'quiet town morning') },
+  { id: 'p-3', title: 'Orbit Log — Ep. 3', scenes: 6, updated: 'Edited 3 days ago', type: 'sci-fi', progress: 100, ...sceneArtworkFor('sci-fi', 'space station planet orbit') },
+  { id: 'p-4', title: 'Festival Promo', scenes: 5, updated: 'Edited last week', type: 'abstract', progress: 30, ...sceneArtworkFor('abstract', 'glassy abstract shapes') },
 ]
 
 

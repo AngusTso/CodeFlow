@@ -80,8 +80,9 @@ function startCreating() {
       <li v-for="project in visibleProjects" :key="project.id">
         <article class="flex h-full flex-col overflow-hidden rounded-3xl border border-line bg-surface shadow-sm">
           <PlaceholderArt
+            :image-url="project.imageUrl || ''"
             :gradient="gradientFor(project.type, project.scenes)"
-            :alt="`Placeholder artwork for ${project.title}`"
+            :alt="project.alt || `Artwork for ${project.title}`"
             rounded="rounded-none"
             class="aspect-video w-full"
           />

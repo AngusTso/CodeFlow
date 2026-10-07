@@ -27,7 +27,12 @@ const original = computed(
 )
 
 const active = computed(() => store.activeVariation.value)
-const variations = computed(() => store.state.variations.list)
+const variations = computed(() => {
+  // Only takes from the scene being compared, so numbering stays per scene.
+  const sceneId = active.value ? active.value.sceneId : store.selectedScene.value?.id
+  if (!sceneId) return store.state.variations.list
+  return store.state.variations.list.filter((entry) => entry.sceneId === sceneId)
+})
 
 /** Zero-padded label, e.g. "Variation 02" (brief section 15). */
 function labelFor(variation) {
@@ -79,7 +84,9 @@ function useSelected() {
       <figure class="m-0">
         <div
           class="relative aspect-video overflow-hidden rounded border border-line bg-black"
-          :style="{ backgroundImage: original?.gradient }"
+          :style="{ backgroundImage: original?.imageUrl ? `url('${original.imageUrl}')` : original?.gradient, backgroundSize: 'cover', backgroundPosition: 'center' }"
+          role="img"
+          :aria-label="original?.alt || original?.title || 'Original scene artwork'"
         >
           <span
             class="absolute left-2 top-2 rounded bg-black/70 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-white"
@@ -93,7 +100,9 @@ function useSelected() {
       <figure class="m-0">
         <div
           class="relative aspect-video overflow-hidden rounded border border-accent bg-black"
-          :style="{ backgroundImage: active.value.gradient }"
+          :style="{ backgroundImage: active.value.imageUrl ? `url('${active.value.imageUrl}')` : active.value.gradient, backgroundSize: 'cover', backgroundPosition: 'center' }"
+          role="img"
+          :aria-label="active.value.alt || active.value.title || 'Variation scene artwork'"
         >
           <span
             class="absolute left-2 top-2 rounded bg-accent px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-canvas"

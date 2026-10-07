@@ -248,6 +248,7 @@ function onDrop(index) {
 
         <div class="hidden w-16 shrink-0 sm:block">
           <PlaceholderArt
+            :image-url="scene.imageUrl || ''"
             :gradient="scene.gradient"
             :alt="scene.alt"
             rounded="rounded-lg"

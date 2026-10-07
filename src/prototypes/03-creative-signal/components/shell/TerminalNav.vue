@@ -104,9 +104,17 @@ function lockReason(item) {
 
 .term-nav__list {
   display: flex;
+  /* Contained at EVERY width: the row must scroll, never overflow the page
+     (the hints make the row wider than the viewport on tablet/desktop). */
+  overflow-x: auto;
   margin: 0;
   padding: 0;
   list-style: none;
+  scrollbar-width: none;
+}
+
+.term-nav__list::-webkit-scrollbar {
+  display: none;
 }
 
 .term-nav__item {
@@ -198,9 +206,17 @@ function lockReason(item) {
 @media (min-width: 768px) {
   .term-nav__item {
     flex: 1 1 auto;
+    /* Allow shrinking so the row fits instead of pushing a giant empty
+       overflow band past the nav's edge. */
+    min-width: 0;
+  }
+  .term-nav__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .term-nav__hint {
     display: inline;
+    min-width: 0;
     max-width: 12rem;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -212,7 +228,9 @@ function lockReason(item) {
 @media (min-width: 1440px) {
   .term-nav__hint {
     display: inline;
-    max-width: none;
+    /* Capped rather than unbounded: full descriptions, but never a
+       page-level overflow. */
+    max-width: 16rem;
   }
 }
 

@@ -122,7 +122,11 @@ const resultNode = computed(() => {
 
       <!-- Image reveal: the generated possibility, revealed gradually (s. 39). -->
       <div class="syn__art animate-cs-reveal">
-        <span class="syn__artfill" :style="{ backgroundImage: resultNode?.gradient }" aria-hidden="true" />
+        <span
+          class="syn__artfill"
+          :style="{ backgroundImage: resultNode?.imageUrl ? `url('${resultNode.imageUrl}')` : resultNode?.gradient, backgroundSize: 'cover', backgroundPosition: 'center' }"
+          aria-hidden="true"
+        />
         <h3 class="syn__resulttitle">{{ record.result.title }}</h3>
       </div>
 

@@ -24,7 +24,7 @@ const props = defineProps({
 
 const emit = defineEmits(['use'])
 
-/** Placeholder gradient derived from the template's scene type. */
+/** Placeholder fallback derived from the template's scene type. */
 const gradient = computed(() => gradientFor(props.template.type, 1))
 
 /** Human label for the template's scene type, e.g. "Urban". */
@@ -47,9 +47,9 @@ const ariaLabel = computed(
     @click="emit('use', props.template)"
   >
     <PlaceholderArt
+      :image-url="props.template.imageUrl || ''"
       :gradient="gradient"
-      :glyph="props.template.glyph"
-      :alt="`Preview artwork for the ${props.template.title} template`"
+      :alt="props.template.alt || `Preview artwork for the ${props.template.title} template`"
       rounded="rounded-none"
       class="aspect-[16/9] w-full"
     />

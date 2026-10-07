@@ -278,11 +278,7 @@ while remaining reproducible.
 
 ---
 
-## Adding your own images
-
-The prototype ships with **CSS-gradient placeholders instead of image files**,
-on purpose: an image reference would be a separate file, which would break the
-"one self-contained HTML file" requirement.
+## Local artwork
 
 Every piece of artwork goes through one component — `PlaceholderArt.vue`:
 
@@ -291,32 +287,19 @@ if (imageUrl)  → renders <img :src="imageUrl" :alt="alt" loading="lazy">
 otherwise      → renders the gradient + glyph as an accessible placeholder
 ```
 
-### To use real artwork
+The supplied WebP catalogue lives in `src/shared/picture/`, organized by scene
+type, character, and profile. `src/shared/data/mockData.js` loads the local
+catalogue and matches assets to mock prompts and templates; `src/shared/ai/mockAi.js`
+keeps the selected image and its descriptive alt text on generated scenes and
+characters. Prototype 03 uses the same semantic scene-art mapping for concepts
+and its image-reference input.
 
-1. Create `src/prototypes/01-code-flow/assets/`.
-2. Put your image there.
-3. Import it in `src/shared/data/mockData.js` and assign it:
-
-```js
-// at the top of src/shared/data/mockData.js
-import neonCityShot from '../prototypes/01-code-flow/assets/neon-city.jpg'
-
-// then on the relevant entry (template, character, …)
-{
-  id: 'neon-city',
-  title: 'Neon City Nights',
-  imageUrl: neonCityShot,   // ← add this line
-  // …
-}
-```
-
-4. For **generated** scenes, add `imageUrl` inside `buildScene()` in
-   `src/shared/ai/mockAi.js` (it already receives the scene type, so this is
-   where a per-type image map would go).
-
-Vite converts the import into a base64 data-URI at build time, because
-`build.assetsInlineLimit` is set very high in `vite.config.js`. So the built
-file stays self-contained **and** shows your real images.
+Vite converts local image URLs into data URIs at build time, because
+`build.assetsInlineLimit` is set very high in `vite.config.js`. The final
+prototype HTML remains self-contained and works offline. The `alt` text
+describes informative artwork; small artwork next to an equivalent visible
+label is treated as decorative to avoid repeating the same content for
+screen-reader users.
 
 ### Why not a `/public` folder?
 
@@ -325,9 +308,10 @@ they are copied next to the HTML as separate files. That would break the single
 file requirement, so the prototype avoids `public/` entirely (even the favicon
 is an inline SVG data-URI).
 
-**Note on file size:** base64 inflates images by roughly 33%, and everything is
-in the one file. For a prototype, 1–2 small images per type is plenty; large
-photo sets would bloat the deliverable.
+**Note on file size:** base64 inflates images by roughly 33%, and each prototype
+HTML includes its own embedded image catalogue. Keep artwork resized to its
+largest display dimensions and compressed as WebP; check the generated files
+after `npm run build:all`.
 
 ---
 
@@ -575,8 +559,9 @@ creative universe**, not a reskin of Prototype 01:
 
 ```powershell
 npm run build:03     # -> dist/prototype-03-creative-signal.html (single file)
-node verify-p03.mjs  # -> 20/20 logic tests (universe, synthesis, branches,
-                       #    stabilise, shared storyboard, preview, undo regressions)
+node verify-p03.mjs  # -> 25/25 logic tests (universe, synthesis, branches,
+                       #    stabilise, shared storyboard, preview, character
+                       #    signal, timeline swap, undo regressions)
 ```
 
 The built file makes **zero network requests** (no external
@@ -639,7 +624,6 @@ The materials for both are already in this repository:
 
 *Prototype 01 — Code Flow. Built with Vue 3, Tailwind CSS v4 and Vite 7; shipped
 as a single self-contained HTML file.*
-
 
 
 

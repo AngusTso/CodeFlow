@@ -7,8 +7,8 @@
  *   • If `imageUrl` is provided it renders <img :src="imageUrl" :alt="alt">.
  *   • Otherwise it renders a decorative CSS gradient with an optional glyph.
  *
- * The prototype ships gradient placeholders so the built HTML stays a single
- * self-contained file with zero external requests (AGENTS.md requirement).
+ * Local WebP artwork is embedded in the built HTML; gradients remain a safe
+ * fallback for content that does not have a matching image.
  * See the "IMAGE SLOTS" header comment in `src/shared/data/mockData.js` for
  * copy-paste instructions on supplying your own artwork.
  */

@@ -142,6 +142,7 @@ function discardChanges() {
               @click="selectedId = scene.id"
             >
               <PlaceholderArt
+                :image-url="scene.imageUrl || ''"
                 :gradient="scene.gradient"
                 :alt="scene.alt"
                 rounded="rounded-xl"

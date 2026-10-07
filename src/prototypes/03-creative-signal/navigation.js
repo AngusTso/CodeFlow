@@ -58,6 +58,7 @@ export const SUGGESTED_SIGNALS = [
   'A detective who lives inside a machine that is still running.',
   'Something futuristic, but homesick for a decade that never happened.',
   'A forest that grew underneath a city and is now pushing back.',
+  'The last gardener on a dead planet, still talking to the seeds.',
 ]
 
 /* ========================================================================== */

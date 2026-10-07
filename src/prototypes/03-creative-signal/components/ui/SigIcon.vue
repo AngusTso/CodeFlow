@@ -26,6 +26,7 @@ const props = defineProps({
  */
 const PATHS = {
   mic: 'M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3ZM5 11a7 7 0 0 0 14 0M12 18v3',
+  user: 'M12 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8ZM4 21c0-3.9 3.6-6.5 8-6.5s8 2.6 8 6.5',
   pencil: 'M4 20h4L20 8l-4-4L4 16v4ZM14 6l4 4',
   image: 'M3 5h18v14H3zM3 16l5-5 4 4 3-3 6 6',
   spark: 'M12 2v6M12 16v6M2 12h6M16 12h6M5 5l4 4M15 15l4 4M19 5l-4 4M9 15l-4 4',

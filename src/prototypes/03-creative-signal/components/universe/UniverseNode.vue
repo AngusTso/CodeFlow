@@ -45,8 +45,14 @@ const emit = defineEmits(['select', 'dragstart', 'dragend', 'actions'])
 /** Long-press timer for touch devices (brief section 16.1). */
 const pressTimer = ref(null)
 
-/** Placeholder is decorative art; the title and metadata carry the meaning. */
-const artStyle = computed(() => ({ backgroundImage: props.node.gradient }))
+/** Artwork is decorative here; the node title and description carry meaning. */
+const artStyle = computed(() => ({
+  backgroundImage: props.node.imageUrl
+    ? `url('${props.node.imageUrl}')`
+    : props.node.gradient,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+}))
 
 /** How many children branch away - "3 branches" on the metadata line. */
 const branchLabel = computed(() =>
@@ -96,7 +102,7 @@ function onPointerUp() {
     :data-status="props.node.status"
     :aria-pressed="props.selected"
     :aria-label="`${props.node.title}. ${props.node.description} ${branchLabel}.`"
-    @click="emit('select', props.node.id)"
+    @click="emit('select', props.node.id, $event)"
     @pointerdown="onPointerDown"
     @pointerup="onPointerUp"
     @pointercancel="onPointerUp"

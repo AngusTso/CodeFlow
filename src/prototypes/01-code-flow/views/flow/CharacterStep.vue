@@ -121,9 +121,10 @@ function confirmDelete() {
             @click="addFromTemplate(template)"
           >
             <PlaceholderArt
+              :image-url="template.imageUrl || ''"
               :gradient="`linear-gradient(135deg, ${template.palette[0]} 0%, ${template.palette[1]} 100%)`"
               :glyph="template.glyph"
-              :alt="`Preview artwork for the ${template.archetype} template`"
+              :alt="template.alt || `Preview artwork for the ${template.archetype} template`"
               rounded="rounded-2xl"
               class="size-16 shrink-0"
             />
@@ -180,7 +181,7 @@ function confirmDelete() {
         <PlaceholderArt
           :image-url="previewScene.imageUrl || ''"
           :gradient="previewScene.gradient"
-          :alt="`Placeholder artwork for scene ${previewScene.order}: ${previewScene.title}`"
+          :alt="`${previewScene.alt} Scene ${previewScene.order}: ${previewScene.title}.`"
           rounded="rounded-none"
           class="aspect-video w-full"
         />
@@ -197,6 +198,7 @@ function confirmDelete() {
             class="flex items-center gap-2 rounded-full bg-surface/95 py-1 pl-1 pr-3 shadow-sm backdrop-blur"
           >
             <PlaceholderArt
+              :image-url="character.imageUrl || ''"
               :gradient="character.gradient"
               :alt="character.alt"
               rounded="rounded-full"

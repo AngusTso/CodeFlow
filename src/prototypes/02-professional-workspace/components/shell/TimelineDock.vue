@@ -121,7 +121,7 @@ function endDrag() {
   drag.value = null
   if (!active || !active.seconds) return
 
-  if (active.mode === 'move') store.moveClip(active.trackId, active.clipId, active.seconds)
+  if (active.mode === 'move') store.moveClipBySeconds(active.trackId, active.clipId, active.seconds)
   else store.resizeClip(active.trackId, active.clipId, active.seconds)
 }
 
@@ -166,6 +166,17 @@ function dragStyle(trackId, clipId) {
         <span class="text-ink3">/ {{ total.toFixed(1) }}s</span>
       </p>
 
+      <Btn
+        size="sm"
+        variant="ghost"
+        icon="plus"
+        title="Add a scene after the selection"
+        :disabled="store.state.ai.running"
+        @click="store.addScene()"
+      >
+        Add scene
+      </Btn>
+
       <div class="ml-auto">
         <Btn
           size="sm"
@@ -186,7 +197,7 @@ function dragStyle(trackId, clipId) {
       <div class="flex items-center gap-3">
         <span class="w-24 shrink-0 text-[11px] text-ink3">Scrub</span>
         <input
-          class="tl-scrub w-full cursor-pointer"
+          class="tl-scrub w-full min-w-0 cursor-pointer"
           type="range"
           min="0"
           :max="total"
@@ -253,11 +264,17 @@ function dragStyle(trackId, clipId) {
                   : 'ring-1 ring-transparent hover:ring-line'
               "
               :style="[
-                { left: pct(clip.start), width: pct(clip.duration), background: clip.gradient },
+                {
+                  left: pct(clip.start),
+                  width: pct(clip.duration),
+                  backgroundImage: clip.imageUrl ? `url('${clip.imageUrl}')` : clip.gradient,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                },
                 dragStyle(track.id, clip.id),
               ]"
               :aria-pressed="isSelected(track.id, clip.id)"
-              :aria-label="`${clip.label}, starts ${clip.start.toFixed(1)} seconds, lasts ${clip.duration.toFixed(1)} seconds`"
+              :aria-label="`${clip.label}${clip.alt ? `: ${clip.alt}` : ''}, starts ${clip.start.toFixed(1)} seconds, lasts ${clip.duration.toFixed(1)} seconds`"
               :title="clip.label"
               @click="select(track.id, clip.id)"
               @pointerdown="beginDrag($event, 'move', track, clip)"

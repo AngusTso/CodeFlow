@@ -50,14 +50,15 @@ const transformStyle = computed(() => ({
   transform: `translate3d(${store.state.view.x}px, ${store.state.view.y}px, 0) scale(${store.state.view.zoom})`,
 }))
 
-/** Connection lines, offset so they meet node centres. */
+/** Connection lines, drawn centre-to-centre (nodes are centred on their
+ *  position via negative margins, so no half-size offset is needed). */
 const edges = computed(() =>
   store.connections.value.map((edge) => ({
     id: edge.id,
-    x1: edge.from.x + store.bounds.nodeW / 2,
-    y1: edge.from.y + store.bounds.nodeH / 2,
-    x2: edge.to.x + store.bounds.nodeW / 2,
-    y2: edge.to.y + store.bounds.nodeH / 2,
+    x1: edge.from.x,
+    y1: edge.from.y,
+    x2: edge.to.x,
+    y2: edge.to.y,
   })),
 )
 
@@ -68,9 +69,11 @@ const PAD = 900
 /* Pan + node drag                                                     */
 /* ------------------------------------------------------------------ */
 
-/** Start a pan when the press lands on empty space rather than a node. */
+/** Start a pan when the press lands on empty space rather than a node
+ *  or one of the floating controls (the zoom buttons must keep their click —
+ *  pointer capture would retarget it away from them). */
 function onViewportPointerDown(event) {
-  if (event.target.closest('.unode')) return
+  if (event.target.closest('.unode, button, a, input, select, textarea')) return
   panning.value = { x: event.clientX, y: event.clientY }
   viewportEl.value?.setPointerCapture?.(event.pointerId)
 }
@@ -79,6 +82,8 @@ function onViewportPointerDown(event) {
 function onPointerMove(event) {
   if (panning.value) {
     store.panBy(event.clientX - panning.value.x, event.clientY - panning.value.y)
+    // Re-base on every move so deltas stay relative, never cumulative.
+    panning.value = { x: event.clientX, y: event.clientY }
     return
   }
   if (!drag.value) return
@@ -123,6 +128,9 @@ function onNodeDragStart({ id, event }) {
 
 /** Finish a drag; commit the collision as a synthesis (brief section 16.1). */
 function onNodeDragEnd() {
+  // Always end a pending pan here too: pointerup lands on the shared handler,
+  // and leaving panning set made the map follow the cursor after every click.
+  panning.value = null
   const dragged = drag.value
   const target = collideId.value
   drag.value = null

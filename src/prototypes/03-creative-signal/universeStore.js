@@ -300,7 +300,7 @@ export function createUniverseStore() {
   /**
    * Send a signal and build the opening Creative Universe.
    *
-   * @param {{content: string, type?: string, label?: string, gradient?: string, alt?: string}} input
+   * @param {{content: string, type?: string, label?: string, gradient?: string, imageUrl?: string, alt?: string}} input
    * @returns {Promise<void>}
    */
   async function initializeSignal(input) {
@@ -323,6 +323,7 @@ export function createUniverseStore() {
       label: input.label || content,
       source: input.type || 'text',
       gradient: input.gradient || 'linear-gradient(135deg, #00e5ff 0%, #8b5cff 100%)',
+      imageUrl: input.imageUrl || null,
       alt: input.alt || '',
     })
 
@@ -352,6 +353,7 @@ export function createUniverseStore() {
         kind: 'signal',
         title: signal.label,
         gradient: signal.gradient,
+        imageUrl: signal.imageUrl,
         alt: signal.alt || `Signal: ${signal.label}`,
         nodeId: root.id,
       })
@@ -498,6 +500,7 @@ export function createUniverseStore() {
       kind: 'synthesis',
       title: node.title,
       gradient: node.gradient,
+      imageUrl: node.imageUrl,
       alt: node.alt,
       nodeId: node.id,
     })
@@ -560,6 +563,7 @@ export function createUniverseStore() {
       kind: 'branch',
       title: alternative.title,
       gradient: alternative.gradient,
+      imageUrl: alternative.imageUrl,
       alt: alternative.alt,
       nodeId: alternative.id,
     })
@@ -599,6 +603,7 @@ export function createUniverseStore() {
         kind: 'branch',
         title: node.title,
         gradient: node.gradient,
+        imageUrl: node.imageUrl,
         alt: node.alt,
         nodeId: node.id,
       })
@@ -735,6 +740,7 @@ export function createUniverseStore() {
       kind: 'stabilized',
       title: state.concept.title,
       gradient: node.gradient,
+      imageUrl: node.imageUrl,
       alt: node.alt,
       nodeId: node.id,
     })
@@ -793,6 +799,27 @@ export function createUniverseStore() {
       .reduce((sum, frame) => sum + (frame.duration || 0), 0)
     state.preview.frameIndex = index
     state.preview.time = Math.min(start, total)
+  }
+
+  /**
+   * Swap two scenes in the storyboard order (export timeline editor).
+   * The playhead returns to the start so the new order is what plays next.
+   * @param {string} aId
+   * @param {string} bId
+   */
+  function swapScenes(aId, bId) {
+    const scenes = state.storyboard?.scenes
+    if (!scenes) return
+    const aIndex = scenes.findIndex((scene) => scene.id === aId)
+    const bIndex = scenes.findIndex((scene) => scene.id === bId)
+    if (aIndex < 0 || bIndex < 0 || aIndex === bIndex) return
+    const next = [...scenes]
+    const held = next[aIndex]
+    next[aIndex] = next[bIndex]
+    next[bIndex] = held
+    state.storyboard.scenes = next
+    seekFrame(0)
+    notify(`SEQUENCE UPDATED — SCENE ${aIndex + 1} ↔ SCENE ${bIndex + 1}`)
   }
 
   /* ------------------------------------------------------------------ */
@@ -912,6 +939,7 @@ export function createUniverseStore() {
     turnIntoVideo,
     togglePreview,
     seekFrame,
+    swapScenes,
     // lab
     setLabValue,
     loadLabFor,

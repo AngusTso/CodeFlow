@@ -38,7 +38,13 @@ function revisit(entry) {
 
     <ol v-else class="arc__list">
       <li v-for="entry in entries" :key="entry.id" class="arc__item cs-corners">
-        <span class="arc__art" :style="{ backgroundImage: entry.gradient }" :role="entry.alt ? 'img' : undefined" :aria-label="entry.alt || undefined" aria-hidden="entry.alt ? undefined : 'true'" />
+        <span
+          class="arc__art"
+          :style="{ backgroundImage: entry.imageUrl ? `url('${entry.imageUrl}')` : entry.gradient, backgroundSize: 'cover', backgroundPosition: 'center' }"
+          :role="entry.alt ? 'img' : undefined"
+          :aria-label="entry.alt || undefined"
+          :aria-hidden="entry.alt ? undefined : 'true'"
+        />
         <div class="arc__text">
           <p class="arc__code">{{ entry.code }} · {{ kinds[entry.kind] || entry.kind }} · <span class="tnum">{{ entry.stamp }}</span></p>
           <h2 class="arc__entrytitle">{{ entry.title }}</h2>

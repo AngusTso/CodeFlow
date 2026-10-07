@@ -168,6 +168,7 @@ const shareLink = computed(() =>
         >
           <div class="relative">
             <PlaceholderArt
+              :image-url="entry.scene.imageUrl || ''"
               :gradient="entry.scene.gradient"
               :alt="entry.scene.alt"
               rounded="rounded-lg"

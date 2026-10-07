@@ -257,7 +257,7 @@ function referenceCharacter(template) {
 </script>
 
 <template>
-  <section class="flex h-full min-h-0 flex-col overflow-hidden" :aria-label="meta.title">
+  <section class="flex flex-col" :aria-label="meta.title">
     <!-- ============================ Header ============================ -->
     <header class="flex items-center gap-3 border-b border-line px-4 py-2.5">
       <div class="min-w-0 flex-1">
@@ -282,7 +282,7 @@ function referenceCharacter(template) {
     </header>
 
     <!-- ===================== Section body (scrolls) ===================== -->
-    <div class="min-h-0 flex-1 overflow-y-auto scroll px-4 py-4">
+    <div class="px-4 py-4">
       <!-- =========================== STORYBOARD =========================== -->
       <div v-if="section === 'storyboard'" class="space-y-4">
         <!-- The brief: the single input everything else is derived from. -->
@@ -300,6 +300,9 @@ function referenceCharacter(template) {
         <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
           <Btn variant="primary" icon="spark" :disabled="running" @click="regenerate">
             Regenerate storyboard
+          </Btn>
+          <Btn variant="ghost" icon="plus" :disabled="running" @click="store.addScene()">
+            Add scene
           </Btn>
           <p class="text-[11px] text-ink3">
             {{ scenes.length }} scenes · {{ total.toFixed(1) }}s ·
@@ -510,8 +513,14 @@ function referenceCharacter(template) {
               :aria-pressed="activeCharacterId === character.id"
               @click="selectCharacter(character.id)"
             >
-              <!-- Monogram over the character's own gradient; never the only cue. -->
+              <img
+                v-if="character.imageUrl"
+                :src="character.imageUrl"
+                :alt="character.alt"
+                class="size-12 shrink-0 rounded-lg object-cover"
+              />
               <span
+                v-else
                 class="grid size-12 shrink-0 place-items-center rounded-lg text-[15px] font-semibold text-ink"
                 :style="{ background: character.gradient }"
                 aria-hidden="true"
@@ -661,4 +670,3 @@ function referenceCharacter(template) {
     </div>
   </section>
 </template>
-

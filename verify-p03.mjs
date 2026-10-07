@@ -74,6 +74,50 @@ check('store-root-subtree-remove', (() => {
 store.runUndo()
 check('store-root-subtree-undo', store.state.nodes.length === 5, `${store.state.nodes.length} nodes`)
 
+// Character signal: seeds a character-rooted universe (bug list item 4).
+const sc = createSignal({
+  content: 'The last gardener on a dead planet, still talking to the seeds.',
+  label: 'The last gardener on a dead planet, still talking to the seeds.',
+  type: 'character',
+  source: 'character',
+})
+const uc = await generateInitialUniverse(sc)
+check(
+  'character-universe',
+  uc.length === 5 && uc.every((n) => n.signals.includes('CHARACTER')),
+  uc.map((n) => n.title).join(' | '),
+)
+check(
+  'character-directions',
+  uc.slice(1).some((n) => /A DAY IN THE LIFE|BEFORE |LAST ONE|DREAMS ABOUT/.test(n.title)),
+  uc.slice(1).map((n) => n.title).join(' | '),
+)
+
+// Timeline swap: guard without a storyboard, then a real reorder (bug item 5).
+check('swap-scenes-guard', (() => {
+  store.swapScenes('nope', 'nada') // no storyboard yet — must not throw
+  return true
+})())
+const storeE = createUniverseStore()
+await storeE.initializeSignal({ type: 'text', content: 'What if a city was alive?' })
+const rootE = storeE.state.nodes.find((n) => !n.parentId)
+await storeE.stabilize(rootE.id)
+await storeE.turnIntoVideo()
+const scenesE = storeE.state.storyboard.scenes
+const aId = scenesE[0].id
+const bId = scenesE[2].id
+storeE.swapScenes(aId, bId)
+check(
+  'swap-scenes',
+  storeE.state.storyboard.scenes[0].id === bId && storeE.state.storyboard.scenes[2].id === aId,
+  storeE.state.storyboard.scenes.map((s) => s.title).join(' | '),
+)
+check(
+  'swap-scenes-persists-concept',
+  Boolean(storeE.state.concept),
+  storeE.state.concept ? storeE.state.concept.title : 'concept cleared',
+)
+
 const failed = results.filter((r) => !r.ok)
 for (const r of results) console.log(`${r.ok ? 'PASS' : 'FAIL'} ${r.name} ${r.detail}`)
 console.log(`\n${results.length - failed.length}/${results.length} passed`)

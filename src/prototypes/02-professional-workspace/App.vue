@@ -73,6 +73,27 @@ const inspectorDocked = atLeast1440
 const navOpen = ref(false)
 const inspectorOpen = ref(false)
 
+/* Docked panes collapse into the available canvas; smaller layouts open them
+   as slide-over panels from the same top-bar controls. */
+const navVisible = ref(true)
+const inspectorVisible = ref(true)
+
+function onNavToggle() {
+  if (navDocked.value) navVisible.value = !navVisible.value
+  else navOpen.value = true
+}
+
+function onInspectorToggle() {
+  if (inspectorDocked.value) inspectorVisible.value = !inspectorVisible.value
+  else inspectorOpen.value = true
+}
+
+function onFocusToggle() {
+  const showSidebars = !navVisible.value && !inspectorVisible.value
+  navVisible.value = showSidebars
+  inspectorVisible.value = showSidebars
+}
+
 // The store keeps its own `inspector.open` for the desktop toggle; the overlay
 // flags are purely local to this shell.
 watch(section, () => {
@@ -150,7 +171,7 @@ onBeforeUnmount(() => store.dispose())
 </script>
 
 <template>
-  <div class="ws">
+  <div class="ws" :data-nav="navVisible ? 'on' : 'off'" :data-inspector="inspectorVisible ? 'on' : 'off'">
     <!-- Keyboard users jump straight past the navigation. -->
     <a class="skip-link" href="#stage">Skip to workspace</a>
 
@@ -159,8 +180,12 @@ onBeforeUnmount(() => store.dispose())
       class="ws-top"
       :nav-docked="navDocked"
       :inspector-docked="inspectorDocked"
-      @open-nav="navOpen = true"
-      @open-inspector="inspectorOpen = true"
+      :nav-visible="navVisible"
+      :inspector-visible="inspectorVisible"
+      :focus-mode="!navVisible && !inspectorVisible"
+      @toggle-nav="onNavToggle"
+      @toggle-inspector="onInspectorToggle"
+      @toggle-focus="onFocusToggle"
     />
 
     <!-- ============ LEFT PROJECT NAVIGATION (section 5) ============ -->
@@ -168,6 +193,7 @@ onBeforeUnmount(() => store.dispose())
          slide-over below it. The wrapper handles the geometry so
          ProjectNav itself stays purely presentational. -->
     <aside
+      id="project-navigation"
       class="ws-nav"
       :data-open="navDocked ? undefined : navOpen"
       :aria-hidden="!navDocked && !navOpen ? 'true' : undefined"
@@ -184,7 +210,7 @@ onBeforeUnmount(() => store.dispose())
     />
 
     <!-- ==================== CENTRE: PREVIEW + SECTION ==================== -->
-    <main id="stage" class="ws-stage">
+    <main id="stage" class="ws-stage" tabindex="0" aria-label="Scrollable workspace content">
       <!-- The preview is the visual focus of the workspace (brief section 6). -->
       <VideoPreview />
       <!-- Section content: storyboard / scenes / assets / characters / library. -->
@@ -193,6 +219,7 @@ onBeforeUnmount(() => store.dispose())
 
     <!-- ============== PERSISTENT INSPECTOR (brief section 7) ============== -->
     <aside
+      id="workspace-inspector"
       class="ws-inspector"
       :data-open="inspectorDocked ? undefined : inspectorOpen"
       :aria-hidden="!inspectorDocked && !inspectorOpen ? 'true' : undefined"
@@ -248,7 +275,13 @@ onBeforeUnmount(() => store.dispose())
 .ws-stage {
   grid-area: stage;
   min-width: 0;
-  overflow: auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 .ws-timeline {
   grid-area: timeline;
@@ -340,5 +373,51 @@ onBeforeUnmount(() => store.dispose())
     display: none;
   }
 }
-</style>
+/* ==========================================================================
+ * Layout readjust - docked panes can be hidden from the top bar.
+ * The base grid above stays untouched; these only add narrower column sets.
+ * ========================================================================== */
+@media (min-width: 768px) {
+  .ws[data-nav='off'] {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'top'
+      'stage'
+      'timeline'
+      'action';
+  }
+  .ws[data-nav='off'] .ws-nav {
+    display: none;
+  }
+}
 
+@media (min-width: 1440px) {
+  .ws[data-nav='off'] {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    grid-template-areas:
+      'top top'
+      'stage inspector'
+      'timeline timeline'
+      'action action';
+  }
+  .ws[data-inspector='off'] {
+    grid-template-columns: 236px minmax(0, 1fr);
+    grid-template-areas:
+      'top top'
+      'nav stage'
+      'timeline timeline'
+      'action action';
+  }
+  .ws[data-nav='off'][data-inspector='off'] {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'top'
+      'stage'
+      'timeline'
+      'action';
+  }
+  .ws[data-inspector='off'] .ws-inspector {
+    display: none;
+  }
+}
+</style>

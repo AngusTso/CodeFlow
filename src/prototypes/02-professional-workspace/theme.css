@@ -73,6 +73,9 @@
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
+    /* Closed slide-over panes live off-canvas. Combined with the per-component
+       min-width fixes, this guarantees no horizontal scrollbar at any size. */
+    overflow-x: hidden;
   }
 
   body {

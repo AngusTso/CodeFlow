@@ -59,7 +59,37 @@ const character = computed(() => {
 })
 
 const actions = computed(() => store.contextActions.value)
-const variations = computed(() => store.state.variations.list)
+/**
+ * The variation list for the SELECTED scene only.
+ *
+ * Two bugs fixed here:
+ *   1. The store keeps one flat list, so a take generated for scene 02 used to
+ *      show up on scene 03 as well. Entries are now filtered by sceneId.
+ *   2. An "Original" row used to disappear as soon as a variation was
+ *      generated. It is now synthesised from the live scene and pinned first,
+ *      so the untouched baseline is always visible and previewable.
+ */
+const variations = computed(() => {
+  const current = scene.value
+  if (!current) return []
+  const generated = store.state.variations.list.filter((entry) => entry.sceneId === current.id)
+  const number = String(current.order).padStart(2, '0')
+  return [
+    {
+      id: 'original',
+      sceneId: current.id,
+      isOriginal: true,
+      label: `Scene ${number} · Original`,
+      summary: 'The version currently in the sequence.',
+      changes: [],
+      gradient: current.gradient,
+    },
+    ...generated,
+  ]
+})
+
+/** Alternates for this scene, excluding the pinned original row. */
+const generatedCount = computed(() => variations.value.filter((entry) => !entry.isOriginal).length)
 const openGroup = computed(() => store.state.inspector.group)
 
 /** Accent chip explaining who made the current version (section 13). */
@@ -178,6 +208,19 @@ const initials = computed(() =>
 
     <!-- ============================ SCENE ============================ -->
     <template v-else-if="scene">
+      <!-- Scene name: rename in place, one undoable step. -->
+      <section class="border-b border-line px-4 py-3">
+        <label class="eyebrow" for="pro-scene-name">Scene name</label>
+        <input
+          id="pro-scene-name"
+          type="text"
+          class="field mt-2"
+          maxlength="80"
+          :value="scene.title"
+          @change="store.setSceneName(scene.id, $event.target.value)"
+          @keydown.enter="$event.target.blur()"
+        />
+      </section>
       <!-- Section 9: natural-language direction AND parameters, never either. -->
       <section class="border-b border-line px-4 py-3">
         <label class="eyebrow" for="pro-prompt">Prompt</label>
@@ -253,7 +296,7 @@ const initials = computed(() =>
               <input
                 id="pro-intensity"
                 type="range"
-                class="mt-1.5 h-1 w-full cursor-pointer appearance-none rounded-full bg-line accent-accent"
+                class="mt-1.5 h-1 w-full min-w-0 cursor-pointer appearance-none rounded-full bg-line accent-accent"
                 :min="LIGHTING_INTENSITY.min"
                 :max="LIGHTING_INTENSITY.max"
                 :step="LIGHTING_INTENSITY.step"
@@ -317,14 +360,15 @@ const initials = computed(() =>
       <section class="border-b border-line px-4 py-3">
         <div class="flex items-center justify-between">
           <p class="eyebrow">Variations</p>
-          <span class="font-mono text-[11px] text-ink3">{{ variations.length }}</span>
+          <span class="font-mono text-[11px] text-ink3">{{ generatedCount + 1 }}</span>
         </div>
 
-        <p v-if="!variations.length" class="mt-2 text-[12px] leading-relaxed text-ink3">
-          No alternates yet. Generating one leaves this version untouched.
+        <p v-if="!generatedCount" class="mt-2 text-[12px] leading-relaxed text-ink3">
+          No alternates yet. The row below is the original - generating one
+          never touches it.
         </p>
 
-        <ul v-else class="mt-2 space-y-1.5">
+        <ul class="mt-2 space-y-1.5">
           <li
             v-for="variation in variations"
             :key="variation.id"
@@ -351,7 +395,14 @@ const initials = computed(() =>
               <Btn size="sm" variant="ghost" @click="store.previewVariation(variation.id)">
                 Preview
               </Btn>
-              <Btn size="sm" variant="primary" @click="useVariation(variation.id)">Use</Btn>
+              <Btn
+                v-if="!variation.isOriginal"
+                size="sm"
+                variant="primary"
+                @click="useVariation(variation.id)"
+              >
+                Use
+              </Btn>
             </div>
           </li>
         </ul>
@@ -439,7 +490,14 @@ const initials = computed(() =>
     <template v-else-if="character">
       <section class="border-b border-line px-4 py-3">
         <div class="flex items-center gap-3">
+          <img
+            v-if="character.imageUrl"
+            :src="character.imageUrl"
+            :alt="character.alt"
+            class="size-10 shrink-0 rounded-full object-cover"
+          />
           <span
+            v-else
             class="grid size-10 shrink-0 place-items-center rounded-full font-semibold text-canvas"
             :style="{ background: character.gradient }"
             aria-hidden="true"

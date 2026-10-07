@@ -14,7 +14,7 @@
  */
 
 import { computed } from 'vue'
-import { SAMPLE_PROJECTS } from '../../../shared/data/mockData.js'
+import { PROFILE_ARTWORK, SAMPLE_PROJECTS } from '../../../shared/data/mockData.js'
 import { useReducedMotion, useStore } from '../composables.js'
 import AppButton from '../components/ui/AppButton.vue'
 import AppIcon from '../components/ui/AppIcon.vue'
@@ -53,8 +53,9 @@ function resetDemo() {
     <!-- ================================================================ -->
     <section class="flex items-center gap-4 rounded-3xl border border-line bg-surface p-5 shadow-sm">
       <PlaceholderArt
+        :image-url="PROFILE_ARTWORK.imageUrl"
         gradient="linear-gradient(135deg, #4d57e0 0%, #8b5cf6 100%)"
-        alt="Your profile picture placeholder"
+        :alt="PROFILE_ARTWORK.alt"
         rounded="rounded-2xl"
         class="size-16 shrink-0"
       />
