@@ -10,8 +10,8 @@ different visual and interaction styles. **Prototype 01 is complete.**
 | # | Name | Persona | Device | Visual direction | Status |
 |---|------|---------|--------|------------------|--------|
 | 01 | **Code Flow** | Casual creator | Mobile-first | Minimalist, friendly, low complexity | Built |
-| 02 | **Code Flow Pro** | Professional filmmaker / marketer | Desktop-first | Professional creative studio (dark, cinematic) | Design doc ready |
-| 03 | _to be decided_ | Creative explorer / innovator | TBD | Retro / cyberpunk (tentative) | Not started |
+| 02 | **Code Flow Pro** | Professional filmmaker / marketer | Desktop-first | Professional creative studio (dark, cinematic) | Built |
+| 03 | **Code Flow Signal** | Creative explorer / innovator | Desktop-first | Retro / cyberpunk (tentative) | Built |
 
 All three follow the same conceptual workflow:
 
