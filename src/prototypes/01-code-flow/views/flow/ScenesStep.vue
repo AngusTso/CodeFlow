@@ -127,7 +127,7 @@ function discardChanges() {
       <section aria-labelledby="scene-picker-heading">
         <h2 id="scene-picker-heading" class="text-sm font-medium text-muted">Choose a scene</h2>
 
-        <ul class="no-scrollbar -mx-4 mt-2 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
+        <ul class="no-scrollbar -mx-4 mt-2 flex snap-x snap-mandatory gap-2 overflow-x-auto overscroll-x-contain scroll-smooth px-4 pb-1 touch-pan-x sm:mx-0 sm:px-0">
           <li v-for="(scene, index) in scenes" :key="scene.id" class="shrink-0">
             <button
               type="button"

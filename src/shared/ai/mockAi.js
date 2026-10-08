@@ -257,13 +257,24 @@ export function regenerateScene(scene, variant = 1) {
   const rebuilt = buildScene(rng, (scene.order || 1) - 1, { type: scene.type })
 
   // Preserve the user's deliberate choices; only the AI-made parts change.
+  // Keep the current title/prompt/settings in place so edits survive a
+  // regeneration instead of being overwritten by the newly-built placeholder.
   return simulate(
     {
       ...rebuilt,
       id: scene.id, // keep identity so Vue keys, selection and focus survive
       order: scene.order,
-      duration: scene.duration,
-      transition: scene.transition,
+      title: scene.title ?? rebuilt.title,
+      prompt: scene.prompt ?? rebuilt.prompt,
+      type: scene.type ?? rebuilt.type,
+      typeLabel: scene.typeLabel ?? rebuilt.typeLabel,
+      mood: scene.mood ?? rebuilt.mood,
+      camera: scene.camera ?? rebuilt.camera,
+      style: scene.style ?? rebuilt.style,
+      lighting: scene.lighting ?? rebuilt.lighting,
+      duration: scene.duration ?? rebuilt.duration,
+      transition: scene.transition ?? rebuilt.transition,
+      gradient: scene.gradient ?? rebuilt.gradient,
     },
     950,
   )
