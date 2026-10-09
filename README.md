@@ -1,7 +1,6 @@
 # Code Flow — Prototype 01
 
-A **front-end prototype** of an AI short-video creation platform, built for the
-E-Song Intelligent take-home assignment.
+A **front-end prototype** of an AI short-video creation platform
 
 This repository will eventually hold **three standalone HTML5 prototypes** that
 share one codebase and one product logic but present three deliberately
