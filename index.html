@@ -10,13 +10,20 @@
     <title>CodeFlow — Interactive Prototype Showcase</title>
     <style>
       :root {
-        color-scheme: dark;
-        --bg: #0b1020;
-        --panel: #121a2c;
-        --line: #27334a;
-        --text: #f4f7fb;
-        --muted: #a8b4c8;
-        --accent: #8bafff;
+        color-scheme: light;
+        /* Rice / warm cream base palette */
+        --bg: #f6eed8;
+        --panel: #fdf8ec;
+        --paper: #fffdf4;
+        --wood: #b08050;
+        --wood-soft: #8f663d;
+        --wood-deep: #6f4a2b;
+        --line: #e0cba3;
+        --text: #4a3524;
+        --muted: #7a6450;
+        --accent: #a8502a;
+        --accent-soft: #e0a458;
+        --shadow: rgba(111, 74, 43, 0.18);
       }
       * {
         box-sizing: border-box;
@@ -24,7 +31,8 @@
       body {
         margin: 0;
         font:
-          16px/1.6 Inter,
+          16px/1.6 ui-rounded,
+          Inter,
           ui-sans-serif,
           system-ui,
           -apple-system,
@@ -32,9 +40,29 @@
           "Segoe UI",
           sans-serif;
         color: var(--text);
+        background-color: var(--bg);
+        background-image:
+          radial-gradient(circle at 12px 12px, rgba(140, 100, 60, 0.06) 0 1.6px, transparent 2px),
+          radial-gradient(ellipse at 15% -4%, rgba(233, 183, 112, 0.5) 0, transparent 45%),
+          radial-gradient(ellipse at 92% 6%, rgba(210, 138, 92, 0.22) 0, transparent 42%),
+          linear-gradient(180deg, #fbf4e2 0%, #f3e7cc 100%);
+        background-size: 26px 26px, auto, auto, auto;
+        background-repeat: repeat, no-repeat, no-repeat, no-repeat;
+      }
+      /* Warm wooden trim along the top edge of the page */
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 8px;
         background:
-          radial-gradient(ellipse at 15% 0%, #1a2a4a 0, transparent 45%),
-          var(--bg);
+          repeating-linear-gradient(90deg, rgba(255, 238, 205, 0.16) 0 3px, transparent 3px 12px),
+          linear-gradient(180deg, #bb8c5a 0%, #8a5f38 100%);
+        box-shadow: 0 1px 5px rgba(109, 76, 45, 0.35);
+        z-index: 10;
+        pointer-events: none;
       }
       main {
         width: min(1100px, calc(100% - 40px));
@@ -47,12 +75,14 @@
         font-weight: 750;
         letter-spacing: 0.16em;
         text-transform: uppercase;
+        text-shadow: 0 1px 0 rgba(255, 250, 235, 0.85);
       }
       h1 {
         margin: 0.5rem 0 1rem;
         font-size: clamp(2.5rem, 7vw, 5rem);
         line-height: 1.02;
         letter-spacing: -0.055em;
+        text-shadow: 0 2px 0 rgba(255, 252, 240, 0.9);
       }
       .intro {
         max-width: 720px;
@@ -65,67 +95,147 @@
         gap: 10px;
         margin: 24px 0 48px;
       }
+      /* Wooden chip tags: small rectangular plaques, not pills */
       .pill {
-        border: 1px solid var(--line);
-        color: #d4def0;
-        padding: 6px 11px;
-        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid var(--wood-deep);
+        color: #fdf5e6;
+        padding: 6px 12px;
+        border-radius: 10px;
         font-size: 0.82rem;
+        font-weight: 600;
+        background:
+          repeating-linear-gradient(100deg, rgba(255, 240, 210, 0.1) 0 2px, transparent 2px 9px),
+          linear-gradient(180deg, #8f663d 0%, #79522d 100%);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 236, 202, 0.35),
+          0 2px 0 rgba(109, 76, 45, 0.4);
       }
       .grid {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 18px;
+        gap: 22px;
       }
+      /* Wooden signboard cards with a rice-paper face */
       article {
+        position: relative;
         display: flex;
         flex-direction: column;
         min-height: 310px;
-        padding: 23px;
-        border: 1px solid var(--line);
-        border-radius: 20px;
-        background:
-          linear-gradient(160deg, rgba(255, 255, 255, 0.045), transparent 70%),
-          var(--panel);
+        padding: 26px 24px 24px;
+        border: 2px solid var(--wood);
+        border-radius: 14px;
+        background-color: var(--panel);
+        background-image:
+          repeating-linear-gradient(90deg, rgba(176, 128, 80, 0.05) 0 2px, transparent 2px 8px),
+          repeating-linear-gradient(0deg, rgba(176, 128, 80, 0.04) 0 1px, transparent 1px 16px),
+          linear-gradient(180deg, var(--paper) 0%, #f8edd5 100%);
+        box-shadow:
+          inset 0 0 0 3px rgba(255, 253, 244, 0.9),
+          inset 0 0 0 4px rgba(176, 128, 80, 0.3),
+          0 10px 22px var(--shadow);
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
       }
+      /* Little wooden peg so each card reads as a hanging sign */
+      article::before {
+        content: "";
+        position: absolute;
+        top: -8px;
+        left: 50%;
+        width: 14px;
+        height: 14px;
+        transform: translateX(-50%);
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 30%, #dcae6f 0%, #8a5f38 75%);
+        box-shadow: 0 2px 3px rgba(109, 76, 45, 0.35);
+      }
+      article:hover {
+        transform: translateY(-3px);
+        box-shadow:
+          inset 0 0 0 3px rgba(255, 253, 244, 0.9),
+          inset 0 0 0 4px rgba(176, 128, 80, 0.3),
+          0 16px 30px rgba(111, 74, 43, 0.22);
+      }
+      /* Carved wooden nameplate label */
       .number {
-        color: var(--accent);
-        font-size: 0.82rem;
+        align-self: flex-start;
+        color: #fdf5e6;
+        font-size: 0.78rem;
         font-weight: 750;
-        letter-spacing: 0.08em;
+        letter-spacing: 0.12em;
+        padding: 5px 11px;
+        border: 1px solid var(--wood-deep);
+        border-radius: 8px;
+        background:
+          repeating-linear-gradient(100deg, rgba(255, 240, 210, 0.1) 0 2px, transparent 2px 9px),
+          linear-gradient(180deg, #8f663d 0%, #79522d 100%);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 236, 202, 0.35),
+          0 2px 0 rgba(109, 76, 45, 0.35);
       }
       h2 {
         font-size: 1.35rem;
         line-height: 1.2;
-        margin: 18px 0 10px;
+        margin: 16px 0 10px;
       }
       article p {
         color: var(--muted);
         margin: 0 0 24px;
       }
       .tags {
-        color: #c3cde0;
+        color: var(--muted);
         font-size: 0.82rem;
         margin-top: auto;
         padding-bottom: 18px;
       }
+      /* Wooden action button: beveled, presses down on click */
       a.button {
         display: inline-flex;
         justify-content: center;
         text-decoration: none;
-        color: #081124;
-        background: #c8d8ff;
+        color: #fff6e6;
+        background:
+          repeating-linear-gradient(100deg, rgba(255, 232, 196, 0.12) 0 2px, transparent 2px 9px),
+          linear-gradient(180deg, #a85a30 0%, #8f4520 100%);
         font-weight: 750;
         padding: 11px 15px;
-        border-radius: 10px;
+        border: 1px solid #7c3a1a;
+        border-radius: 12px;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 226, 187, 0.4),
+          0 3px 0 #71361a,
+          0 10px 16px rgba(113, 54, 26, 0.22);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
       }
       a.button:hover {
-        background: #fff;
+        background:
+          repeating-linear-gradient(100deg, rgba(255, 232, 196, 0.14) 0 2px, transparent 2px 9px),
+          linear-gradient(180deg, #b26238 0%, #99491f 100%);
+        transform: translateY(-1px);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 226, 187, 0.45),
+          0 4px 0 #71361a,
+          0 12px 18px rgba(113, 54, 26, 0.26);
+      }
+      a.button:active {
+        transform: translateY(2px);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 226, 187, 0.3),
+          0 1px 0 #71361a;
+      }
+      a.button:focus-visible {
+        outline: 3px solid var(--accent);
+        outline-offset: 3px;
       }
       .about {
-        margin-top: 44px;
-        padding: 24px 0 0;
-        border-top: 1px solid var(--line);
+        margin-top: 48px;
+        padding: 26px 24px 22px;
+        border: 2px solid var(--line);
+        border-radius: 14px;
+        background-color: rgba(255, 253, 244, 0.7);
+        background-image: linear-gradient(180deg, #fffdf4 0%, #f8edd5 100%);
+        box-shadow: inset 0 0 0 3px rgba(255, 253, 244, 0.9);
         color: var(--muted);
       }
       .about strong {
@@ -134,17 +244,28 @@
       footer {
         margin-top: 38px;
         font-size: 0.85rem;
-        color: #8290a8;
+        color: #7f6a53;
       }
       @media (max-width: 800px) {
         main {
-          padding-top: 48px;
+          padding-top: 52px;
         }
         .grid {
           grid-template-columns: 1fr;
         }
         article {
           min-height: 0;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        article,
+        a.button {
+          transition: none;
+        }
+        article:hover,
+        a.button:hover,
+        a.button:active {
+          transform: none;
         }
       }
     </style>
